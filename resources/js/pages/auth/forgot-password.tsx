@@ -12,7 +12,6 @@ export default function ForgotPassword({ status }: { status?: string }) {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-
         post(route('password.email'));
     };
 
@@ -23,34 +22,45 @@ export default function ForgotPassword({ status }: { status?: string }) {
             {status && <div className="alert alert-success mb-3">{status}</div>}
 
             <form onSubmit={submit}>
-                <div className="input-group mb-3">
-                    <input
-                        type="email"
-                        className="form-control"
-                        placeholder="Email"
-                        name="email"
-                        autoComplete="off"
-                        value={data.email}
-                        autoFocus
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
-                    <div className="input-group-text">
-                        <span className="bi bi-envelope"></span>
+                <div className="mb-3">
+                    <div className="input-group">
+                        <input
+                            type="email"
+                            className="form-control"
+                            placeholder="Email"
+                            name="email"
+                            autoComplete="off"
+                            value={data.email}
+                            autoFocus
+                            onChange={(e) => setData('email', e.target.value)}
+                            disabled={processing}
+                        />
+                        <div className="input-group-text">
+                            <span className="bi bi-envelope"></span>
+                        </div>
                     </div>
+                    <InputError message={errors.email} />
                 </div>
-                <InputError message={errors.email} />
 
                 <div className="row">
                     <div className="col-12">
-                        <button type="submit" className="btn btn-primary btn-block" disabled={processing}>
-                            {processing ? 'Sending...' : 'Send Password Reset Link'}
-                        </button>
+                        <div className="d-grid gap-2">
+                            <button
+                                type="submit"
+                                className="btn btn-primary w-100"
+                                disabled={processing}
+                            >
+                                {processing ? 'Sending...' : 'Send Password Reset Link'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </form>
 
-            <p className="mt-3 mb-1">
-                <Link href={route('login')}>Login</Link>
+            <p className="mt-3 mb-0">
+                <Link href={route('login')} className="text-center">
+                    Login
+                </Link>
             </p>
         </AuthAdminLTELayout>
     );
