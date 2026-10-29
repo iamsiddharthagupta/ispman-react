@@ -1,4 +1,13 @@
-import '../css/app.css';
+// import '../css/app.css';
+
+// 1. Import CSS Styles
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'admin-lte/dist/css/adminlte.min.css';
+
+// 2. Import JS Scripts (Bootstrap first, then AdminLTE)
+import 'bootstrap';
+import 'admin-lte';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';

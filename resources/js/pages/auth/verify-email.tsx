@@ -1,11 +1,8 @@
 // Components
-import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import AuthLayout from '@/layouts/auth-layout';
+import AuthAdminLTELayout from '@/layouts/auth/auth-adminlte-layout';
 
 export default function VerifyEmail({ status }: { status?: string }) {
     const { post, processing } = useForm({});
@@ -17,25 +14,28 @@ export default function VerifyEmail({ status }: { status?: string }) {
     };
 
     return (
-        <AuthLayout title="Verify email" description="Please verify your email address by clicking on the link we just emailed to you.">
+        <AuthAdminLTELayout title="Verify email" description="Please verify your email address by clicking on the link we just emailed to you.">
             <Head title="Email verification" />
 
             {status === 'verification-link-sent' && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
+                <div className="alert alert-success mb-3">
                     A new verification link has been sent to the email address you provided during registration.
                 </div>
             )}
 
-            <form onSubmit={submit} className="space-y-6 text-center">
-                <Button disabled={processing} variant="secondary">
-                    {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                    Resend verification email
-                </Button>
+            <form onSubmit={submit} className="text-center">
+                <div className="row">
+                    <div className="col-12">
+                        <button type="submit" className="btn btn-primary btn-block" disabled={processing}>
+                            {processing ? 'Sending...' : 'Resend Verification Email'}
+                        </button>
+                    </div>
+                </div>
 
-                <TextLink href={route('logout')} method="post" className="mx-auto block text-sm">
-                    Log out
-                </TextLink>
+                <p className="mt-3 mb-1">
+                    <Link href={route('logout')} method="post">Log out</Link>
+                </p>
             </form>
-        </AuthLayout>
+        </AuthAdminLTELayout>
     );
 }

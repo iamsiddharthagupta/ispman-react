@@ -1,35 +1,60 @@
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+// resources/js/Pages/Dashboard.tsx
+import { ReactNode } from 'react';
+import AdminLayout from '@/layouts/adminlte-layout';
 import { Head } from '@inertiajs/react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-    },
-];
 
 export default function Dashboard() {
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative aspect-video overflow-hidden rounded-xl border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 rounded-xl border md:min-h-min">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+
+            <div className="row mb-4">
+                <div className="col-sm-6">
+                    <h1 className="m-0">Dashboard</h1>
                 </div>
             </div>
-        </AppLayout>
+
+            <div className="row">
+                <div className="col-lg-3 col-6">
+                    <div className="small-box text-bg-primary p-3 rounded mb-3">
+                        <div className="inner">
+                            <h3>150</h3>
+                            <p>New Orders</p>
+                        </div>
+                        <i className="small-box-icon bi bi-bag"></i>
+                    </div>
+                </div>
+                <div className="col-lg-3 col-6">
+                    <div className="small-box text-bg-primary p-3 rounded mb-3">
+                        <div className="inner">
+                            <h3>150</h3>
+                            <p>New Orders</p>
+                        </div>
+                        <i className="small-box-icon bi bi-bag"></i>
+                    </div>
+                </div>
+                <div className="col-lg-3 col-6">
+                    <div className="small-box text-bg-primary p-3 rounded mb-3">
+                        <div className="inner">
+                            <h3>150</h3>
+                            <p>New Orders</p>
+                        </div>
+                        <i className="small-box-icon bi bi-bag"></i>
+                    </div>
+                </div>
+                <div className="col-lg-3 col-6">
+                    <div className="small-box text-bg-primary p-3 rounded mb-3">
+                        <div className="inner">
+                            <h3>150</h3>
+                            <p>New Orders</p>
+                        </div>
+                        <i className="small-box-icon bi bi-bag"></i>
+                    </div>
+                </div>
+            </div>
+        </>
     );
 }
+
+// Attach the persistent layout to the component function
+Dashboard.layout = (page: ReactNode) => <AdminLayout>{page}</AdminLayout>;
