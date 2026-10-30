@@ -7,7 +7,7 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
     return (
-        <div className="app-wrapper sidebar-expand-lg" data-bs-theme="light">
+        <div className="app-wrapper sidebar-expand-lg">
             <Navbar />
             <Sidebar />
 

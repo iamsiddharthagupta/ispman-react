@@ -1,0 +1,46 @@
+/* ISPMan sidebar logo */
+
+.sidebar-brand .brand-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 14px 10px;
+    text-decoration: none;
+}
+
+.brand-icon {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0d6efd;
+    color: #fff;
+    border-radius: 9px;
+    font-size: 19px;
+}
+
+.brand-text {
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+}
+
+.brand-isp {
+    color: #0d6efd;
+}
+
+.brand-man {
+    color: var(--bs-emphasis-color);
+}
+
+.brand-version {
+    font-size: 10px;
+    font-weight: 700;
+    color: #0d6efd;
+    background: rgba(13, 110, 253, 0.12);
+    padding: 4px 6px;
+    border-radius: 5px;
+}
