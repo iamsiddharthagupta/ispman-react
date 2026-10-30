@@ -11,7 +11,6 @@ class Payment extends Model
         'due_amount',
         'paid_amount',
         'payment_date',
-        'adjustment',
         'mode',
         'remarks',
     ];
@@ -22,7 +21,6 @@ class Payment extends Model
             'due_amount' => 'decimal:2',
             'paid_amount' => 'decimal:2',
             'payment_date' => 'date:Y-m-d',
-            'adjustment' => 'decimal:2',
         ];
     }
 

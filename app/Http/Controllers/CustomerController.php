@@ -122,7 +122,6 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'order_id' => ['required', 'integer', Rule::exists('orders', 'id')->where('customer_id', $customer->id)],
             'paid_amount' => ['required', 'numeric', 'decimal:0,2', 'min:0'],
-            'adjustment' => ['required', 'numeric', 'decimal:0,2', 'min:0'],
             'payment_date' => ['required', 'date'],
             'mode' => ['required', Rule::in(['Cash', 'Online', 'Cheque'])],
             'remarks' => ['nullable', 'string'],
@@ -135,17 +134,16 @@ class CustomerController extends Controller
                 ->firstOrFail();
             $dueCents = $this->moneyToCents($order->due_amount);
             $paidCents = $this->moneyToCents($validated['paid_amount']);
-            $adjustmentCents = $this->moneyToCents($validated['adjustment']);
 
-            if ($paidCents + $adjustmentCents === 0) {
+            if ($paidCents === 0) {
                 throw ValidationException::withMessages([
-                    'paid_amount' => 'Enter a payment or adjustment amount.',
+                    'paid_amount' => 'Enter a payment amount.',
                 ]);
             }
 
-            if ($paidCents + $adjustmentCents > $dueCents) {
+            if ($paidCents > $dueCents) {
                 throw ValidationException::withMessages([
-                    'paid_amount' => 'The payment and adjustment cannot exceed the outstanding due.',
+                    'paid_amount' => 'The payment cannot exceed the outstanding due.',
                 ]);
             }
 
@@ -153,13 +151,12 @@ class CustomerController extends Controller
                 'due_amount' => number_format($dueCents / 100, 2, '.', ''),
                 'paid_amount' => number_format($paidCents / 100, 2, '.', ''),
                 'payment_date' => $validated['payment_date'],
-                'adjustment' => number_format($adjustmentCents / 100, 2, '.', ''),
                 'mode' => $validated['mode'],
                 'remarks' => $validated['remarks'] ?? null,
             ]);
 
             $order->update([
-                'due_amount' => number_format(($dueCents - $paidCents - $adjustmentCents) / 100, 2, '.', ''),
+                'due_amount' => number_format(($dueCents - $paidCents) / 100, 2, '.', ''),
             ]);
         });
 

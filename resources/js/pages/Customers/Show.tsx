@@ -68,7 +68,6 @@ export default function Show({ customer, plans }: ShowProps) {
     const payment = useForm({
         order_id: '',
         paid_amount: '',
-        adjustment: '0',
         payment_date: today(),
         mode: 'Cash',
         remarks: '',
@@ -79,7 +78,6 @@ export default function Show({ customer, plans }: ShowProps) {
         payment.setData({
             order_id: String(order.id),
             paid_amount: '',
-            adjustment: '0',
             payment_date: today(),
             mode: 'Cash',
             remarks: '',
@@ -559,7 +557,6 @@ export default function Show({ customer, plans }: ShowProps) {
                                                             <th>Date</th>
                                                             <th>Mode</th>
                                                             <th className="text-end">Paid</th>
-                                                            <th className="text-end">Adjustment</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -568,7 +565,6 @@ export default function Show({ customer, plans }: ShowProps) {
                                                                 <td>{formatDate(entry.payment_date)}</td>
                                                                 <td>{entry.mode}</td>
                                                                 <td className="text-end">{formatMoney(entry.paid_amount)}</td>
-                                                                <td className="text-end">{formatMoney(entry.adjustment)}</td>
                                                             </tr>
                                                         ))}
                                                     </tbody>

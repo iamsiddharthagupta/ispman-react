@@ -40,6 +40,29 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
         );
     }
 
+    const customerTableStyles = {
+        headCells: {
+            style: {
+                fontSize: '13px',
+                fontWeight: '700',
+                paddingLeft: '16px',
+                paddingRight: '16px',
+            },
+        },
+        cells: {
+            style: {
+                fontSize: '16px',
+                paddingLeft: '16px',
+                paddingRight: '16px',
+            },
+        },
+        rows: {
+            style: {
+                minHeight: '40px',
+            },
+        },
+    };
+
     const columns = useMemo<TableColumn<Plan>[]>(
         () => [
             {
@@ -51,17 +74,6 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                 minWidth: '190px',
                 cell: plan => (
                     <div className="d-flex align-items-center gap-3 py-2">
-                        <div
-                            className="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
-                            style={{
-                                width: 38,
-                                height: 38,
-                                background: 'var(--bs-primary-bg-subtle)',
-                                color: 'var(--bs-primary)',
-                            }}
-                        >
-                            <i className="fas fa-wifi" />
-                        </div>
                         <div>
                             <div className="fw-semibold text-body">
                                 {plan.name}
@@ -78,7 +90,6 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                 sortable: true,
                 cell: plan => (
                     <span className="fw-semibold text-body">
-                        <i className="fas fa-gauge-high me-2 text-body-secondary" />
                         {plan.speed}
                         <span className="text-body-secondary"> Mbps</span>
                     </span>
@@ -109,7 +120,6 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                 sortable: true,
                 cell: plan => (
                     <span className="text-body-secondary">
-                        <i className="far fa-calendar me-2" />
                         {plan.duration} month{plan.duration > 1 ? 's' : ''}
                     </span>
                 ),
@@ -203,49 +213,6 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
         [url],
     );
 
-    const tableStyles = {
-        headRow: {
-            style: {
-                backgroundColor: 'var(--bs-tertiary-bg)',
-                borderBottom: '1px solid var(--bs-border-color)',
-                minHeight: '48px',
-            },
-        },
-        headCells: {
-            style: {
-                fontSize: '11px',
-                fontWeight: '700',
-                letterSpacing: '0.06em',
-                color: 'var(--bs-secondary-color)',
-                paddingLeft: '16px',
-                paddingRight: '16px',
-            },
-        },
-        rows: {
-            style: {
-                minHeight: '68px',
-                borderBottom: '1px solid var(--bs-border-color)',
-            },
-            highlightOnHoverStyle: {
-                backgroundColor: 'var(--bs-tertiary-bg)',
-                cursor: 'default',
-            },
-        },
-        cells: {
-            style: {
-                paddingLeft: '16px',
-                paddingRight: '16px',
-                fontSize: '13px',
-            },
-        },
-        pagination: {
-            style: {
-                borderTop: '1px solid var(--bs-border-color)',
-                minHeight: '56px',
-            },
-        },
-    };
-
     return (
         <AdminLayout>
             <Head title="Plans" />
@@ -257,9 +224,6 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                         <div>
                             <div className="d-flex align-items-center gap-2 mb-1">
                                 <h3 className="mb-0 fw-bold">Internet Plans</h3>
-                                <span className="badge text-bg-primary rounded-pill">
-                                    {plans.total}
-                                </span>
                             </div>
 
                             <ol className="breadcrumb small mt-2 mb-0">
@@ -291,6 +255,7 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                     <div className="card border-0 shadow-sm">
                         <div className="card-body p-0">
                             <DataTable
+                                customStyles={customerTableStyles}
                                 key={`${sorting.sort}-${sorting.direction}-${plans.current_page}`}
                                 columns={columns}
                                 data={plans.data}
@@ -335,7 +300,6 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                                         </Link>
                                     </div>
                                 }
-                                customStyles={tableStyles}
                             />
                         </div>
 

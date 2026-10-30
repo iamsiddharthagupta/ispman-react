@@ -12,7 +12,6 @@ export interface CustomerPayment {
     due_amount: string;
     paid_amount: string;
     payment_date: string;
-    adjustment: string;
     mode: 'Cash' | 'Online' | 'Cheque';
     remarks: string | null;
     created_at: string;

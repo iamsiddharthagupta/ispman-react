@@ -156,7 +156,6 @@ export default function Index({ customers, sorting }: CustomerIndexProps) {
                         <div>
                             <div className="d-flex align-items-center gap-2 mb-1">
                                 <h3 className="mb-0 fw-bold">Customers</h3>
-                                <span className="badge text-bg-primary rounded-pill">{customers.total}</span>
                             </div>
                             <ol className="breadcrumb small mt-2 mb-0">
                                 <li className="breadcrumb-item">

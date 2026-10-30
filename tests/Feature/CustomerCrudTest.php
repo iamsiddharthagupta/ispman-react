@@ -143,7 +143,6 @@ class CustomerCrudTest extends TestCase
         $this->post(route('customers.payments.store', $customer), [
             'order_id' => $order->id,
             'paid_amount' => '20.00',
-            'adjustment' => '2.00',
             'payment_date' => '2026-10-30',
             'mode' => 'Online',
             'remarks' => 'First instalment',
@@ -153,18 +152,16 @@ class CustomerCrudTest extends TestCase
             'order_id' => $order->id,
             'due_amount' => '49.99',
             'paid_amount' => '20.00',
-            'adjustment' => '2.00',
             'mode' => 'Online',
         ]);
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
-            'due_amount' => '27.99',
+            'due_amount' => '29.99',
         ]);
 
         $this->post(route('customers.payments.store', $customer), [
             'order_id' => $order->id,
             'paid_amount' => '10.00',
-            'adjustment' => '0',
             'payment_date' => '2026-10-30',
             'mode' => 'Cash',
         ])->assertRedirect(route('customers.show', $customer));
@@ -173,7 +170,7 @@ class CustomerCrudTest extends TestCase
         $this->assertDatabaseCount('payments', 2);
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
-            'due_amount' => '17.99',
+            'due_amount' => '19.99',
         ]);
         $this->get(route('customers.show', $customer))
             ->assertInertia(fn (Assert $page) => $page
@@ -183,7 +180,6 @@ class CustomerCrudTest extends TestCase
         $this->post(route('customers.payments.store', $customer), [
             'order_id' => $order->id,
             'paid_amount' => '100.00',
-            'adjustment' => '0',
             'payment_date' => '2026-10-30',
             'mode' => 'Cash',
         ])->assertSessionHasErrors('paid_amount');
@@ -267,7 +263,6 @@ class CustomerCrudTest extends TestCase
         $this->post(route('customers.payments.store', $customer), [
             'order_id' => $order->id,
             'paid_amount' => '10.00',
-            'adjustment' => '0',
             'payment_date' => '2026-10-30',
             'mode' => 'Cash',
         ])->assertSessionHasErrors('order_id');
