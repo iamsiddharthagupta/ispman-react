@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PlanController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -15,9 +16,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-
+    Route::get('/dashboard', function () { return Inertia::render('Dashboard'); })->name('dashboard');
+    Route::resource('plans', PlanController::class);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

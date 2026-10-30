@@ -1,3 +1,3 @@
-export { default as Footer } from './footer';
-export { default as Navbar } from './navbar';
-export { default as Sidebar } from './sidebar';
+export { default as Footer } from './ui/footer';
+export { default as Navbar } from './ui/navbar';
+export { default as Sidebar } from './ui/sidebar';

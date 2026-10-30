@@ -11,7 +11,7 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
-        return inertia('login');
+        return inertia('Auth/Login');
     }
 
     public function login(Request $request)
@@ -34,7 +34,7 @@ class AuthController extends Controller
 
     public function showRegistration()
     {
-        return inertia('register');
+        return inertia('Auth/Register');
     }
 
     public function register(Request $request)

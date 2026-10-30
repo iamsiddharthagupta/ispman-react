@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { ColorTheme, getSavedColorTheme, saveColorTheme } from '../lib/color-theme';
+import { ColorTheme, getSavedColorTheme, saveColorTheme } from '../../lib/color-theme';
 
 export default function Navbar() {
     const [colorTheme, setSelectedColorTheme] = useState<ColorTheme>(getSavedColorTheme);

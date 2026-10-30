@@ -30,6 +30,7 @@
         "laravel-vite-plugin": "^1.0",
         "overlayscrollbars": "^2.17.0",
         "react": "^19.0.0",
+        "react-data-table-component": "^8.12.0",
         "react-dom": "^19.0.0",
         "typescript": "^5.7.2",
         "vite": "^6.0"

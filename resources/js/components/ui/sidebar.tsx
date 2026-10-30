@@ -1,11 +1,15 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import { appRoute } from '../../lib/app-route';
 
 export default function Sidebar() {
+    const { url } = usePage();
+    const dashboardUrl = appRoute(url, '/dashboard');
+    const plansUrl = appRoute(url, '/plans');
+
     return (
         <aside className="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
-
             <div className="sidebar-brand">
-                <Link href="/dashboard" className="brand-link">
+                <Link href={dashboardUrl} className="brand-link">
                     <span className="brand-icon">
                         <i className="bi bi-diagram-3-fill"></i>
                     </span>
@@ -18,9 +22,11 @@ export default function Sidebar() {
                     <span className="brand-version">2.0</span>
                 </Link>
             </div>
-            
+
             <div className="sidebar-search" role="search">
-                <label htmlFor="sidebar-search-input" className="visually-hidden">Filter menu</label>
+                <label htmlFor="sidebar-search-input" className="visually-hidden">
+                    Filter menu
+                </label>
                 <input
                     type="search"
                     id="sidebar-search-input"
@@ -39,9 +45,15 @@ export default function Sidebar() {
                 <nav className="mt-2">
                     <ul className="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false" id="navigation">
                         <li className="nav-item">
-                            <Link href="/dashboard" className="nav-link active">
+                            <Link href={dashboardUrl} className={`nav-link${url.split('?')[0].endsWith('/dashboard') ? ' active' : ''}`}>
                                 <i className="nav-icon fas fa-tachometer-alt" />
                                 <p>Dashboard</p>
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link href={plansUrl} className={`nav-link${url.split('?')[0].includes('/plans') ? ' active' : ''}`}>
+                                <i className="nav-icon fas fa-list-alt" />
+                                <p>Plans</p>
                             </Link>
                         </li>
                     </ul>

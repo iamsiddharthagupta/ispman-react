@@ -1,6 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
-import AuthLayout from '../layouts/auth-layout';
+import AuthLayout from '../../layouts/auth-layout';
 
 interface RegisterProps {
     status?: string;
