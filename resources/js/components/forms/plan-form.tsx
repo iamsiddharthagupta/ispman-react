@@ -80,7 +80,7 @@ export default function PlanForm({ plan }: PlanFormProps) {
                         </div>
                         <div className="col-md-6 mb-3">
                             <label htmlFor="duration" className="form-label">
-                                Duration (days)
+                                Duration (months)
                             </label>
                             <input
                                 id="duration"

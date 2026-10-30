@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PlanController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -18,5 +19,8 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () { return Inertia::render('Dashboard'); })->name('dashboard');
     Route::resource('plans', PlanController::class);
+    Route::post('/customers/{customer}/renewals', [CustomerController::class, 'renewPlan'])->name('customers.renewals.store');
+    Route::post('/customers/{customer}/payments', [CustomerController::class, 'recordPayment'])->name('customers.payments.store');
+    Route::resource('customers', CustomerController::class);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

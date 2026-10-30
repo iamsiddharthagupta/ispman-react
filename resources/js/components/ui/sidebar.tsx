@@ -5,6 +5,7 @@ export default function Sidebar() {
     const { url } = usePage();
     const dashboardUrl = appRoute(url, '/dashboard');
     const plansUrl = appRoute(url, '/plans');
+    const customersUrl = appRoute(url, '/customers');
 
     return (
         <aside className="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
@@ -46,13 +47,23 @@ export default function Sidebar() {
                     <ul className="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false" id="navigation">
                         <li className="nav-item">
                             <Link href={dashboardUrl} className={`nav-link${url.split('?')[0].endsWith('/dashboard') ? ' active' : ''}`}>
-                                <i className="nav-icon fas fa-tachometer-alt" />
+                                <i className="nav-icon fa-solid fa-gauge" />
                                 <p>Dashboard</p>
                             </Link>
                         </li>
+
+                        <li className="nav-header">Customer Management</li>
+                        <li className="nav-item">
+                            <Link href={customersUrl} className={`nav-link${url.split('?')[0].includes('/customers') ? ' active' : ''}`}>
+                                <i className="nav-icon fa-regular fa-user" />
+                                <p>Customers</p>
+                            </Link>
+                        </li>
+
+                        <li className="nav-header">Plan Management</li>
                         <li className="nav-item">
                             <Link href={plansUrl} className={`nav-link${url.split('?')[0].includes('/plans') ? ' active' : ''}`}>
-                                <i className="nav-icon fas fa-list-alt" />
+                                <i className="nav-icon fa-solid fa-wifi" />
                                 <p>Plans</p>
                             </Link>
                         </li>

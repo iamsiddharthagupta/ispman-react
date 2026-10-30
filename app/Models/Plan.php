@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Plan extends Model
 {
@@ -25,5 +26,10 @@ class Plan extends Model
             'vendor_rate' => 'decimal:2',
             'status' => 'integer',
         ];
+    }
+
+    public function customers(): HasMany
+    {
+        return $this->hasMany(Customer::class);
     }
 }

@@ -17,7 +17,6 @@ return new class extends Migration
             $table->decimal('due_amount', 10, 2);
             $table->decimal('paid_amount', 10, 2);
             $table->date('payment_date');
-            $table->decimal('adjustment', 10, 2);
             $table->enum('mode', ['Cash', 'Online', 'Cheque']);
             $table->longText('remarks')->nullable();
             $table->timestamps();

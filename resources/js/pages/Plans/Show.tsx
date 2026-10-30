@@ -45,7 +45,9 @@ export default function Show({ plan }: ShowProps) {
                                 <dt className="col-sm-3">Price</dt>
                                 <dd className="col-sm-9">{plan.price}</dd>
                                 <dt className="col-sm-3">Duration</dt>
-                                <dd className="col-sm-9">{plan.duration} days</dd>
+                                <dd className="col-sm-9">
+                                    {plan.duration} month{plan.duration === 1 ? '' : 's'}
+                                </dd>
                                 <dt className="col-sm-3">Vendor</dt>
                                 <dd className="col-sm-9">{plan.vendor_name}</dd>
                                 <dt className="col-sm-3">Vendor rate</dt>

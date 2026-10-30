@@ -110,7 +110,7 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                 cell: plan => (
                     <span className="text-body-secondary">
                         <i className="far fa-calendar me-2" />
-                        {plan.duration} days
+                        {plan.duration} month{plan.duration > 1 ? 's' : ''}
                     </span>
                 ),
             },
