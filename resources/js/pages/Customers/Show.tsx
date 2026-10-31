@@ -26,13 +26,29 @@ function dateAfter(value: string, days: number): string {
     return date.toISOString().slice(0, 10);
 }
 
-function getNextRenewalDate(orders: CustomerOrder[]): string {
-    const latestEndDate = orders.reduce<string | null>(
-        (latest, order) => (latest === null || order.end_date > latest ? order.end_date : latest),
-        null,
+function dateAfterMonths(value: string, months: number): string {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+
+    if (!match) {
+        return value;
+    }
+
+    const year = Number(match[1]);
+    const monthIndex = Number(match[2]) - 1 + months;
+    const targetYear = year + Math.floor(monthIndex / 12);
+    const targetMonthIndex = ((monthIndex % 12) + 12) % 12;
+    const day = Math.min(
+        Number(match[3]),
+        new Date(Date.UTC(targetYear, targetMonthIndex + 1, 0)).getUTCDate(),
     );
 
-    return latestEndDate ? dateAfter(latestEndDate, 1) : today();
+    return `${targetYear}-${String(targetMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
+function getNextRenewalDate(orders: CustomerOrder[]): string {
+    const latestOrder = getLatestOrder(orders);
+
+    return latestOrder ? dateAfter(latestOrder.end_date, 1) : today();
 }
 
 function formatMoney(value: number | string): string {
@@ -51,18 +67,41 @@ function formatRenewalMonth(value: string): string {
     return month ? `${month}-${match[1].slice(-2)}` : value;
 }
 
+function getLatestOrder(orders: CustomerOrder[]): CustomerOrder | null {
+    return orders.reduce<CustomerOrder | null>(
+        (latest, order) =>
+            latest === null ||
+            order.end_date > latest.end_date ||
+            (order.end_date === latest.end_date && order.id > latest.id)
+                ? order
+                : latest,
+        null,
+    );
+}
+
+function getCarryForwardBalance(orders: CustomerOrder[]): number {
+    return orders.reduce((total, order) => total + Number(order.due_amount), 0);
+}
+
 function getPaidAmount(order: CustomerOrder): number {
-    return Math.max(0, Number(order.plan_price) - Number(order.due_amount));
+    return order.payments.reduce((total, payment) => total + Number(payment.paid_amount), 0);
+}
+
+function formatBalance(value: number): string {
+    return value < 0 ? `Credit ${formatMoney(Math.abs(value))}` : formatMoney(value);
 }
 
 export default function Show({ customer, plans }: ShowProps) {
     const { url } = usePage();
     const orders = customer.orders ?? [];
+    const latestOrder = getLatestOrder(orders);
+    const carryForwardBalance = getCarryForwardBalance(orders);
     const nextRenewalDate = getNextRenewalDate(orders);
     const [showRenewalModal, setShowRenewalModal] = useState(false);
     const [paymentOrder, setPaymentOrder] = useState<CustomerOrder | null>(null);
     const renewal = useForm({
         plan_id: customer.plan_id ? String(customer.plan_id) : '',
+        start_date: nextRenewalDate,
         remarks: '',
     });
     const payment = useForm({
@@ -159,7 +198,7 @@ export default function Show({ customer, plans }: ShowProps) {
             name: 'PLAN',
             selector: (order) => order.plan_name,
             sortable: true,
-            minWidth: '105px',
+            minWidth: '100px',
             grow: 1.25,
             cell: (order) => <span className="fw-semibold text-truncate">{order.plan_name}</span>,
         },
@@ -168,7 +207,7 @@ export default function Show({ customer, plans }: ShowProps) {
             name: 'PERIOD',
             selector: (order) => order.start_date,
             sortable: true,
-            minWidth: '158px',
+            minWidth: '80px',
             grow: 1.8,
             cell: (order) => (
                 <span className="text-nowrap">
@@ -181,7 +220,7 @@ export default function Show({ customer, plans }: ShowProps) {
             name: 'MONTH',
             selector: (order) => formatRenewalMonth(order.start_date),
             sortable: true,
-            minWidth: '76px',
+            minWidth: '50px',
             grow: 0.8,
         },
         {
@@ -189,7 +228,7 @@ export default function Show({ customer, plans }: ShowProps) {
             name: 'TERM',
             selector: (order) => Number(order.plan_duration),
             sortable: true,
-            minWidth: '68px',
+            minWidth: '50px',
             grow: 0.7,
             cell: (order) => `${order.plan_duration} mo`,
         },
@@ -199,9 +238,19 @@ export default function Show({ customer, plans }: ShowProps) {
             selector: (order) => Number(order.plan_price),
             sortable: true,
             right: true,
-            minWidth: '92px',
+            minWidth: '90px',
             grow: 0.9,
-            cell: (order) => formatMoney(order.plan_price),
+            cell: (order) => (
+                <div className="text-end">
+                    <div>{formatMoney(order.plan_price)}</div>
+                    {Number(order.balance_adjustment) !== 0 && (
+                        <div className={`small ${Number(order.balance_adjustment) > 0 ? 'text-danger' : 'text-success'}`}>
+                        {Number(order.balance_adjustment) > 0 ? '- Balance' : '+ Credit'}{' '}
+                        {formatMoney(Math.abs(Number(order.balance_adjustment)))}
+                        </div>
+                    )}
+                </div>
+            ),
         },
         {
             id: 'paid',
@@ -219,10 +268,12 @@ export default function Show({ customer, plans }: ShowProps) {
             selector: (order) => Number(order.due_amount),
             sortable: true,
             right: true,
-            minWidth: '92px',
+            minWidth: '50px',
             grow: 0.9,
             cell: (order) => (
-                <span className={Number(order.due_amount) <= 0 ? 'text-success fw-semibold' : 'fw-semibold'}>{formatMoney(order.due_amount)}</span>
+                <span className={Number(order.due_amount) <= 0 ? 'text-success fw-semibold' : 'fw-semibold'}>
+                    {formatBalance(Number(order.due_amount))}
+                </span>
             ),
         },
         {
@@ -231,17 +282,22 @@ export default function Show({ customer, plans }: ShowProps) {
             button: true,
             right: true,
             ignoreRowClick: true,
-            minWidth: '78px',
-            // padding right
+            minWidth: '50px',
             style: { paddingRight: '12px' },
             grow: 0.75,
             cell: (order) =>
-                Number(order.due_amount) <= 0 ? (
-                    <span className="badge text-bg-success">Paid</span>
-                ) : (
-                    <button type="button" className="btn btn-sm btn-success text-nowrap" onClick={() => openPaymentModal(order)}>
+                Number(order.due_amount) > 0 || order.id === latestOrder?.id ? (
+                    <button
+                        type="button"
+                        className="btn btn-sm btn-success text-nowrap"
+                        aria-label={Number(order.due_amount) > 0 ? 'Add payment' : 'Add advance payment'}
+                        title={Number(order.due_amount) > 0 ? 'Add payment' : 'Add advance payment'}
+                        onClick={() => openPaymentModal(order)}
+                    >
                         <i className="fas fa-plus" />
                     </button>
+                ) : (
+                    <span className="badge text-bg-success">Paid</span>
                 ),
         },
     ];
@@ -322,7 +378,11 @@ export default function Show({ customer, plans }: ShowProps) {
                                     type="button"
                                     className="btn btn-primary"
                                     onClick={() => {
-                                        renewal.setData({ plan_id: customer.plan_id ? String(customer.plan_id) : '', remarks: '' });
+                                        renewal.setData({
+                                            plan_id: customer.plan_id ? String(customer.plan_id) : '',
+                                            start_date: nextRenewalDate,
+                                            remarks: '',
+                                        });
                                         renewal.clearErrors();
                                         setShowRenewalModal(true);
                                     }}
@@ -399,6 +459,18 @@ export default function Show({ customer, plans }: ShowProps) {
                                                     {formatMoney(selectedPlan.price ?? 0)}
                                                 </div>
                                             )}
+                                            {carryForwardBalance !== 0 && (
+                                                <div className="form-text">
+                                                    {carryForwardBalance > 0 ? 'Outstanding balance added' : 'Advance credit applied'}:{' '}
+                                                    {formatMoney(Math.abs(carryForwardBalance))}
+                                                </div>
+                                            )}
+                                            {selectedPlan && (
+                                                <div className="form-text fw-semibold">
+                                                    Amount due after adjustment:{' '}
+                                                    {formatBalance(Number(selectedPlan.price ?? 0) + carryForwardBalance)}
+                                                </div>
+                                            )}
                                             {plans.length === 0 && <div className="form-text">There are no active plans available to renew.</div>}
                                         </div>
                                         <div className="row">
@@ -408,15 +480,16 @@ export default function Show({ customer, plans }: ShowProps) {
                                                 </label>
                                                 <input
                                                     id="renewal_start_date"
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={formatDate(nextRenewalDate)}
-                                                    readOnly
+                                                    type="date"
+                                                    className={`form-control${renewal.errors.start_date ? ' is-invalid' : ''}`}
+                                                    value={renewal.data.start_date}
+                                                    onChange={(event) => renewal.setData('start_date', event.target.value)}
+                                                    required
                                                 />
-                                                <div className="form-text">Starts the day after the latest renewal ends.</div>
+                                                {renewal.errors.start_date && <div className="invalid-feedback">{renewal.errors.start_date}</div>}
+                                                <div className="form-text">Defaults to the day after the latest renewal ends.</div>
                                             </div>
                                             <div className="col-md-6">
-                                                {/* show renewal end date */}
                                                 <label className="form-label" htmlFor="renewal_end_date">
                                                     End Date
                                                 </label>
@@ -426,7 +499,7 @@ export default function Show({ customer, plans }: ShowProps) {
                                                     className="form-control"
                                                     value={
                                                         selectedPlan?.duration != null
-                                                            ? formatDate(dateAfter(nextRenewalDate, selectedPlan.duration * 30 - 1))
+                                                            ? formatDate(dateAfterMonths(renewal.data.start_date, selectedPlan.duration))
                                                             : '—'
                                                     }
                                                     readOnly
@@ -453,6 +526,7 @@ export default function Show({ customer, plans }: ShowProps) {
                                             Cancel
                                         </button>
                                         <button type="submit" className="btn btn-primary" disabled={renewal.processing || plans.length === 0}>
+                                            {renewal.processing && <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />}
                                             {renewal.processing ? 'Renewing…' : 'Confirm renewal'}
                                         </button>
                                     </div>
@@ -477,7 +551,8 @@ export default function Show({ customer, plans }: ShowProps) {
                                             </h5>
                                             <div className="small text-body-secondary">
                                                 {formatDate(paymentOrder.start_date)} - {formatDate(paymentOrder.end_date)} · {paymentOrder.plan_name}{' '}
-                                                · Balance {formatMoney(paymentOrder.due_amount)}
+                                                · {Number(paymentOrder.due_amount) < 0 ? 'Credit' : 'Balance'}{' '}
+                                                {formatMoney(Math.abs(Number(paymentOrder.due_amount)))}
                                             </div>
                                         </div>
                                         <button type="button" className="btn-close" aria-label="Close" onClick={closePaymentModal} />
@@ -491,8 +566,7 @@ export default function Show({ customer, plans }: ShowProps) {
                                                 <input
                                                     id="paid_amount"
                                                     type="number"
-                                                    min="0"
-                                                    max={paymentOrder.due_amount}
+                                                    min="0.01"
                                                     step="0.01"
                                                     className={`form-control${payment.errors.paid_amount ? ' is-invalid' : ''}`}
                                                     value={payment.data.paid_amount}
@@ -500,6 +574,9 @@ export default function Show({ customer, plans }: ShowProps) {
                                                     required
                                                 />
                                                 {payment.errors.paid_amount && <div className="invalid-feedback">{payment.errors.paid_amount}</div>}
+                                                <div className="form-text">
+                                                    You can collect more than the current balance; any extra will be applied to the next renewal.
+                                                </div>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label htmlFor="payment_date" className="form-label">
@@ -533,14 +610,14 @@ export default function Show({ customer, plans }: ShowProps) {
                                                 </select>
                                                 {payment.errors.mode && <div className="invalid-feedback">{payment.errors.mode}</div>}
                                             </div>
-                                            <div className="col-12 mb-3">
+                                            <div className="col-md-6 mb-3">
                                                 <label htmlFor="payment_remarks" className="form-label">
                                                     Remarks
                                                 </label>
                                                 <textarea
                                                     id="payment_remarks"
                                                     className={`form-control${payment.errors.remarks ? ' is-invalid' : ''}`}
-                                                    rows={2}
+                                                    rows={1}
                                                     value={payment.data.remarks}
                                                     onChange={(event) => payment.setData('remarks', event.target.value)}
                                                 />
@@ -579,6 +656,7 @@ export default function Show({ customer, plans }: ShowProps) {
                                             Cancel
                                         </button>
                                         <button type="submit" className="btn btn-success" disabled={payment.processing}>
+                                            {payment.processing && <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />}
                                             {payment.processing ? 'Saving…' : 'Save payment'}
                                         </button>
                                     </div>

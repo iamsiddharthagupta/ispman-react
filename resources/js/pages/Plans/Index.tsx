@@ -106,9 +106,6 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                         <span className="fw-bold text-body">
                             ₹{Number(plan.price).toLocaleString('en-IN')}
                         </span>
-                        <div className="small text-body-secondary">
-                            Per plan
-                        </div>
                     </div>
                 ),
             },
@@ -288,16 +285,6 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                                         <h6 className="fw-semibold">
                                             No plans found
                                         </h6>
-                                        <p className="text-body-secondary small mb-3">
-                                            Create your first internet plan to get started.
-                                        </p>
-                                        <Link
-                                            href={appRoute(url, '/plans/create')}
-                                            className="btn btn-primary btn-sm"
-                                        >
-                                            <i className="fas fa-plus me-1" />
-                                            Add Plan
-                                        </Link>
                                     </div>
                                 }
                             />

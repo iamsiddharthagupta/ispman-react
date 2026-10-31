@@ -182,9 +182,84 @@ class CustomerCrudTest extends TestCase
             'paid_amount' => '100.00',
             'payment_date' => '2026-10-30',
             'mode' => 'Cash',
-        ])->assertSessionHasErrors('paid_amount');
+        ])->assertRedirect(route('customers.show', $customer));
 
-        $this->assertDatabaseCount('payments', 2);
+        $this->assertDatabaseCount('payments', 3);
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'due_amount' => '-80.01',
+        ]);
+    }
+
+    public function test_advance_credit_is_applied_to_the_next_renewal(): void
+    {
+        Carbon::setTestNow('2026-10-30 12:00:00');
+        $this->actingAs(User::factory()->create());
+        $customer = Customer::create($this->validCustomerData());
+        $plan = $this->createPlan();
+
+        $this->post(route('customers.renewals.store', $customer), [
+            'plan_id' => $plan->id,
+        ])->assertRedirect(route('customers.show', $customer));
+        $firstOrder = $customer->orders()->firstOrFail();
+
+        $this->post(route('customers.payments.store', $customer), [
+            'order_id' => $firstOrder->id,
+            'paid_amount' => '49.99',
+            'payment_date' => '2026-10-30',
+            'mode' => 'Cash',
+        ])->assertRedirect(route('customers.show', $customer));
+
+        $this->post(route('customers.payments.store', $customer), [
+            'order_id' => $firstOrder->id,
+            'paid_amount' => '10.00',
+            'payment_date' => '2026-10-30',
+            'mode' => 'Cash',
+        ])->assertRedirect(route('customers.show', $customer));
+
+        $this->post(route('customers.renewals.store', $customer), [
+            'plan_id' => $plan->id,
+        ])->assertRedirect(route('customers.show', $customer));
+
+        $nextOrder = $customer->orders()->latest('id')->firstOrFail();
+        $this->assertSame('-10.00', $nextOrder->balance_adjustment);
+        $this->assertSame('39.99', $nextOrder->due_amount);
+        $this->assertDatabaseHas('orders', [
+            'id' => $firstOrder->id,
+            'due_amount' => '0.00',
+        ]);
+    }
+
+    public function test_outstanding_balance_is_applied_to_the_next_renewal(): void
+    {
+        Carbon::setTestNow('2026-10-30 12:00:00');
+        $this->actingAs(User::factory()->create());
+        $customer = Customer::create($this->validCustomerData());
+        $plan = $this->createPlan();
+
+        $this->post(route('customers.renewals.store', $customer), [
+            'plan_id' => $plan->id,
+        ])->assertRedirect(route('customers.show', $customer));
+        $firstOrder = $customer->orders()->firstOrFail();
+
+        $this->post(route('customers.payments.store', $customer), [
+            'order_id' => $firstOrder->id,
+            'paid_amount' => '20.00',
+            'payment_date' => '2026-10-30',
+            'mode' => 'Cash',
+        ])->assertRedirect(route('customers.show', $customer));
+
+        $this->post(route('customers.renewals.store', $customer), [
+            'plan_id' => $plan->id,
+        ])->assertRedirect(route('customers.show', $customer));
+
+        $nextOrder = $customer->orders()->latest('id')->firstOrFail();
+        $this->assertSame('29.99', $nextOrder->balance_adjustment);
+        $this->assertSame('79.98', $nextOrder->due_amount);
+        $this->assertDatabaseHas('orders', [
+            'id' => $firstOrder->id,
+            'due_amount' => '0.00',
+        ]);
     }
 
     public function test_renewal_starts_the_day_after_the_most_recent_renewal_ends(): void
@@ -213,6 +288,23 @@ class CustomerCrudTest extends TestCase
             'start_date' => '2026-10-31',
             'end_date' => '2026-11-30',
         ]);
+    }
+
+    public function test_renewal_uses_the_selected_start_date_and_calculates_its_end_date(): void
+    {
+        Carbon::setTestNow('2026-10-30 12:00:00');
+        $this->actingAs(User::factory()->create());
+        $customer = Customer::create($this->validCustomerData());
+        $plan = $this->createPlan();
+
+        $this->post(route('customers.renewals.store', $customer), [
+            'plan_id' => $plan->id,
+            'start_date' => '2026-11-15',
+        ])->assertRedirect(route('customers.show', $customer));
+
+        $order = $customer->orders()->firstOrFail();
+        $this->assertSame('2026-11-15', $order->start_date->toDateString());
+        $this->assertSame('2026-12-15', $order->end_date->toDateString());
     }
 
     public function test_monthly_renewal_uses_the_calendar_month_end_without_overflow(): void

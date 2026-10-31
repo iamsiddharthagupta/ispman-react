@@ -6,6 +6,8 @@ export default function Sidebar() {
     const dashboardUrl = appRoute(url, '/dashboard');
     const plansUrl = appRoute(url, '/plans');
     const customersUrl = appRoute(url, '/customers');
+    const renewPlan = appRoute(url, '/renew-plan');
+    const collectPayment = appRoute(url, '/collect-payment');
 
     return (
         <aside className="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
@@ -52,6 +54,20 @@ export default function Sidebar() {
                             </Link>
                         </li>
 
+                        <li className="nav-header">Operations</li>
+                        <li className="nav-item">
+                            <Link href={renewPlan} className={`nav-link${url.split('?')[0].includes('/renew-plan') ? ' active' : ''}`}>
+                                <i className="nav-icon fa-solid fa-arrows-rotate" />
+                                <p>Renew Plan</p>
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link href={collectPayment} className={`nav-link${url.split('?')[0].includes('/collect-payment') ? ' active' : ''}`}>
+                                <i className="nav-icon fa-solid fa-hand-holding-dollar" />
+                                <p>Collect Payment</p>
+                            </Link>
+                        </li>
+
                         <li className="nav-header">Customer Management</li>
                         <li className="nav-item">
                             <Link href={customersUrl} className={`nav-link${url.split('?')[0].includes('/customers') ? ' active' : ''}`}>
@@ -65,6 +81,14 @@ export default function Sidebar() {
                             <Link href={plansUrl} className={`nav-link${url.split('?')[0].includes('/plans') ? ' active' : ''}`}>
                                 <i className="nav-icon fa-solid fa-wifi" />
                                 <p>Plans</p>
+                            </Link>
+                        </li>
+
+                        <li className="nav-header">Setting</li>
+                        <li className="nav-item">
+                            <Link href="#" className="nav-link">
+                                <i className="nav-icon fa-solid fa-gear" />
+                                <p>Change Password</p>
                             </Link>
                         </li>
                     </ul>

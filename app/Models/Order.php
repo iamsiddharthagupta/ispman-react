@@ -16,6 +16,7 @@ class Order extends Model
         'plan_speed',
         'plan_duration',
         'plan_price',
+        'balance_adjustment',
         'due_amount',
         'remarks',
     ];
@@ -26,6 +27,7 @@ class Order extends Model
             'start_date' => 'date:Y-m-d',
             'end_date' => 'date:Y-m-d',
             'plan_price' => 'decimal:2',
+            'balance_adjustment' => 'decimal:2',
             'due_amount' => 'decimal:2',
         ];
     }

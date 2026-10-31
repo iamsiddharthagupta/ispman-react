@@ -19,6 +19,8 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () { return Inertia::render('Dashboard'); })->name('dashboard');
     Route::resource('plans', PlanController::class);
+    Route::get('/renew-plan', [CustomerController::class, 'renewals'])->name('renew-plan.index');
+    Route::post('/renew-plan/bulk', [CustomerController::class, 'bulkRenew'])->name('renew-plan.bulk');
     Route::post('/customers/{customer}/renewals', [CustomerController::class, 'renewPlan'])->name('customers.renewals.store');
     Route::post('/customers/{customer}/payments', [CustomerController::class, 'recordPayment'])->name('customers.payments.store');
     Route::resource('customers', CustomerController::class);

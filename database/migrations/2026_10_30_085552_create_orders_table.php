@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('customer_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('order_number')->unique();
             $table->date('start_date');
             $table->date('end_date');
@@ -20,6 +21,7 @@ return new class extends Migration
             $table->string('plan_speed');
             $table->string('plan_duration');
             $table->decimal('plan_price', 10, 2);
+            $table->decimal('balance_adjustment', 10, 2)->default(0);
             $table->decimal('due_amount', 10, 2);
             $table->longText('remarks')->nullable();
             $table->timestamps();

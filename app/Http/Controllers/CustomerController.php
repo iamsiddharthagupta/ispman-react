@@ -16,6 +16,47 @@ use Inertia\Response;
 
 class CustomerController extends Controller
 {
+    public function renewals(Request $request): Response
+    {
+        $today = Carbon::today();
+        $lastEligibleDate = $today->copy()->addDays(5);
+        $customers = Customer::query()
+            ->with([
+                'plan:id,name',
+                'latestOrder',
+            ])
+            ->where('status', 1)
+            ->whereHas('plan', fn ($query) => $query->where('status', 1))
+            ->whereHas('latestOrder', fn ($query) => $query->whereBetween('end_date', [
+                $today->toDateString(),
+                $lastEligibleDate->toDateString(),
+            ]))
+            ->addSelect([
+                'renewal_end_date' => Order::query()
+                    ->select('end_date')
+                    ->whereColumn('customer_id', 'customers.id')
+                    ->orderByDesc('end_date')
+                    ->orderByDesc('id')
+                    ->limit(1),
+            ])
+            ->orderBy('renewal_end_date')
+            ->paginate(15)
+            ->withQueryString();
+
+        $customers->through(function (Customer $customer) use ($today) {
+            $customer->setAttribute(
+                'remaining_days',
+                (int) $today->diffInDays(Carbon::parse($customer->latestOrder->end_date), false)
+            );
+
+            return $customer;
+        });
+
+        return Inertia::render('RenewPlan/Index', [
+            'customers' => $customers,
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -82,6 +123,7 @@ class CustomerController extends Controller
     {
         $validated = $request->validate([
             'plan_id' => ['required', 'integer', Rule::exists('plans', 'id')->where('status', 1)],
+            'start_date' => ['nullable', 'date_format:Y-m-d'],
             'remarks' => ['nullable', 'string'],
         ]);
         $plan = Plan::query()->findOrFail($validated['plan_id']);
@@ -91,30 +133,83 @@ class CustomerController extends Controller
                 ->whereKey($customer->id)
                 ->lockForUpdate()
                 ->firstOrFail();
-            $latestEndDate = $lockedCustomer->orders()
-                ->orderByDesc('end_date')
-                ->orderByDesc('id')
-                ->value('end_date');
-            $startDate = $latestEndDate
-                ? Carbon::parse($latestEndDate)->addDay()
-                : Carbon::today();
-
-            $lockedCustomer->orders()->create([
-                'order_number' => 'ORD-'.Str::upper(Str::random(12)),
-                'start_date' => $startDate->toDateString(),
-                'end_date' => $startDate->copy()->addMonthsNoOverflow($plan->duration)->toDateString(),
-                'plan_name' => $plan->name,
-                'plan_speed' => $plan->speed,
-                'plan_duration' => (string) $plan->duration,
-                'plan_price' => $plan->price,
-                'due_amount' => $plan->price,
-                'remarks' => $validated['remarks'] ?? null,
-            ]);
-
-            $lockedCustomer->update(['plan_id' => $plan->id]);
+            $this->createRenewal(
+                $lockedCustomer,
+                $plan,
+                $validated['remarks'] ?? null,
+                $validated['start_date'] ?? null,
+            );
         });
 
         return redirect()->route('customers.show', $customer);
+    }
+
+    public function bulkRenew(Request $request)
+    {
+        $validated = $request->validate([
+            'customer_ids' => ['required', 'array', 'min:1', 'max:100'],
+            'customer_ids.*' => ['required', 'integer', 'distinct', 'exists:customers,id'],
+        ]);
+        $customerIds = $validated['customer_ids'];
+        $renewedCount = count($customerIds);
+
+        DB::transaction(function () use ($customerIds) {
+            $customers = Customer::query()
+                ->whereIn('id', $customerIds)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+            $today = Carbon::today();
+            $lastEligibleDate = $today->copy()->addDays(5);
+            $renewals = [];
+
+            if ($customers->count() !== count($customerIds)) {
+                throw ValidationException::withMessages([
+                    'customer_ids' => 'One or more selected customers are no longer available.',
+                ]);
+            }
+
+            foreach ($customers as $customer) {
+                $latestOrder = $customer->orders()
+                    ->lockForUpdate()
+                    ->orderByDesc('end_date')
+                    ->orderByDesc('id')
+                    ->first();
+
+                if (
+                    $customer->status !== 1
+                    || ! $latestOrder
+                    || Carbon::parse($latestOrder->end_date)->lt($today)
+                    || Carbon::parse($latestOrder->end_date)->gt($lastEligibleDate)
+                ) {
+                    throw ValidationException::withMessages([
+                        'customer_ids' => 'One or more selected customers are no longer eligible for renewal.',
+                    ]);
+                }
+
+                $plan = Plan::query()
+                    ->whereKey($customer->plan_id)
+                    ->where('status', 1)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $plan) {
+                    throw ValidationException::withMessages([
+                        'customer_ids' => 'One or more selected customers no longer have an active plan.',
+                    ]);
+                }
+
+                $renewals[] = [$customer, $plan];
+            }
+
+            foreach ($renewals as [$customer, $plan]) {
+                $this->createRenewal($customer, $plan, null);
+            }
+        });
+
+        return redirect()
+            ->route('renew-plan.index')
+            ->with('success', "Successfully renewed {$renewedCount} customer plans.");
     }
 
     public function recordPayment(Request $request, Customer $customer)
@@ -141,9 +236,14 @@ class CustomerController extends Controller
                 ]);
             }
 
-            if ($paidCents > $dueCents) {
+            $latestOrderId = $customer->orders()
+                ->orderByDesc('end_date')
+                ->orderByDesc('id')
+                ->value('id');
+
+            if ($order->id !== $latestOrderId && $dueCents <= 0) {
                 throw ValidationException::withMessages([
-                    'paid_amount' => 'The payment cannot exceed the outstanding due.',
+                    'order_id' => 'Payments can only be added to an older renewal with an outstanding balance.',
                 ]);
             }
 
@@ -221,5 +321,43 @@ class CustomerController extends Controller
     private function moneyToCents(string|int|float $amount): int
     {
         return (int) round((float) $amount * 100);
+    }
+
+    private function createRenewal(Customer $customer, Plan $plan, ?string $remarks, ?string $startDate = null): void
+    {
+        $existingOrders = $customer->orders()
+            ->lockForUpdate()
+            ->orderByDesc('end_date')
+            ->orderByDesc('id')
+            ->get();
+        $latestOrder = $existingOrders->first();
+        $balanceAdjustmentCents = $existingOrders->sum(
+            fn (Order $order) => $this->moneyToCents($order->due_amount)
+        );
+        $renewalStartDate = $startDate
+            ? Carbon::parse($startDate)
+            : ($latestOrder ? Carbon::parse($latestOrder->end_date)->addDay() : Carbon::today());
+        $renewalDueCents = $this->moneyToCents($plan->price) + $balanceAdjustmentCents;
+
+        $customer->orders()->create([
+            'order_number' => 'ORD-'.Str::upper(Str::random(12)),
+            'start_date' => $renewalStartDate->toDateString(),
+            'end_date' => $renewalStartDate->copy()->addMonthsNoOverflow($plan->duration)->toDateString(),
+            'plan_name' => $plan->name,
+            'plan_speed' => $plan->speed,
+            'plan_duration' => (string) $plan->duration,
+            'plan_price' => $plan->price,
+            'balance_adjustment' => number_format($balanceAdjustmentCents / 100, 2, '.', ''),
+            'due_amount' => number_format($renewalDueCents / 100, 2, '.', ''),
+            'remarks' => $remarks,
+        ]);
+
+        foreach ($existingOrders as $existingOrder) {
+            if ($this->moneyToCents($existingOrder->due_amount) !== 0) {
+                $existingOrder->update(['due_amount' => '0.00']);
+            }
+        }
+
+        $customer->update(['plan_id' => $plan->id]);
     }
 }

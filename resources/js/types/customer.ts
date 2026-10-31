@@ -26,6 +26,7 @@ export interface CustomerOrder {
     plan_speed: string;
     plan_duration: string;
     plan_price: string;
+    balance_adjustment: string;
     due_amount: string;
     remarks: string | null;
     created_at: string;
