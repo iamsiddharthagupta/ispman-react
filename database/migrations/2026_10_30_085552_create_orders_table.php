@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('plan_speed');
             $table->string('plan_duration');
             $table->decimal('plan_price', 10, 2);
+            $table->decimal('vendor_rate', 10, 2)->nullable();
             $table->decimal('balance_adjustment', 10, 2)->default(0);
             $table->decimal('due_amount', 10, 2);
             $table->longText('remarks')->nullable();

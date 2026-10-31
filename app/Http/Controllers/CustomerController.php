@@ -347,6 +347,7 @@ class CustomerController extends Controller
             'plan_speed' => $plan->speed,
             'plan_duration' => (string) $plan->duration,
             'plan_price' => $plan->price,
+            'vendor_rate' => $plan->vendor_rate,
             'balance_adjustment' => number_format($balanceAdjustmentCents / 100, 2, '.', ''),
             'due_amount' => number_format($renewalDueCents / 100, 2, '.', ''),
             'remarks' => $remarks,

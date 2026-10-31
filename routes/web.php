@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlanController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::redirect('/', '/login')->name('home');
 
@@ -17,7 +17,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () { return Inertia::render('Dashboard'); })->name('dashboard');
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::resource('plans', PlanController::class);
     Route::get('/renew-plan', [CustomerController::class, 'renewals'])->name('renew-plan.index');
     Route::post('/renew-plan/bulk', [CustomerController::class, 'bulkRenew'])->name('renew-plan.bulk');
