@@ -486,9 +486,9 @@ export default function Navbar() {
 
                     {/* User Footer */}
                     <li className="user-footer">
-                        <a href="#" className="btn btn-outline-secondary">
-                        Profile
-                        </a>
+                        <Link href="/settings/password" className="btn btn-outline-secondary">
+                        Edit Password
+                        </Link>
 
                         <Link
                         href="/logout"

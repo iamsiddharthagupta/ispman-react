@@ -36,20 +36,21 @@ export default function PlanForm({ plan }: PlanFormProps) {
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="name" className="form-label">
+                            <label htmlFor="name" className="form-label fw-bold">
                                 Plan name
                             </label>
                             <input
                                 id="name"
                                 className={`form-control${errors.name ? ' is-invalid' : ''}`}
                                 value={data.name}
+                                placeholder="e.g. Basic"
                                 onChange={(event) => setData('name', event.target.value)}
                                 required
                             />
                             {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="speed" className="form-label">
+                            <label htmlFor="speed" className="form-label fw-bold">
                                 Speed
                             </label>
                             <input
@@ -63,7 +64,7 @@ export default function PlanForm({ plan }: PlanFormProps) {
                             {errors.speed && <div className="invalid-feedback">{errors.speed}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="price" className="form-label">
+                            <label htmlFor="price" className="form-label fw-bold">
                                 Price
                             </label>
                             <input
@@ -73,13 +74,14 @@ export default function PlanForm({ plan }: PlanFormProps) {
                                 step="0.01"
                                 className={`form-control${errors.price ? ' is-invalid' : ''}`}
                                 value={data.price}
+                                placeholder="e.g. 100"
                                 onChange={(event) => setData('price', event.target.value)}
                                 required
                             />
                             {errors.price && <div className="invalid-feedback">{errors.price}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="duration" className="form-label">
+                            <label htmlFor="duration" className="form-label fw-bold">
                                 Duration (months)
                             </label>
                             <input
@@ -89,26 +91,28 @@ export default function PlanForm({ plan }: PlanFormProps) {
                                 step="1"
                                 className={`form-control${errors.duration ? ' is-invalid' : ''}`}
                                 value={data.duration}
+                                placeholder="e.g. 1"
                                 onChange={(event) => setData('duration', event.target.value)}
                                 required
                             />
                             {errors.duration && <div className="invalid-feedback">{errors.duration}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="vendor_name" className="form-label">
+                            <label htmlFor="vendor_name" className="form-label fw-bold">
                                 Vendor name
                             </label>
                             <input
                                 id="vendor_name"
                                 className={`form-control${errors.vendor_name ? ' is-invalid' : ''}`}
                                 value={data.vendor_name}
+                                placeholder="e.g. airtel, Jio, etc."
                                 onChange={(event) => setData('vendor_name', event.target.value)}
                                 required
                             />
                             {errors.vendor_name && <div className="invalid-feedback">{errors.vendor_name}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="vendor_rate" className="form-label">
+                            <label htmlFor="vendor_rate" className="form-label fw-bold">
                                 Vendor rate
                             </label>
                             <input
@@ -118,26 +122,28 @@ export default function PlanForm({ plan }: PlanFormProps) {
                                 step="0.01"
                                 className={`form-control${errors.vendor_rate ? ' is-invalid' : ''}`}
                                 value={data.vendor_rate}
+                                placeholder="e.g. 50"
                                 onChange={(event) => setData('vendor_rate', event.target.value)}
                             />
                             {errors.vendor_rate && <div className="invalid-feedback">{errors.vendor_rate}</div>}
                         </div>
                         <div className="col-12 mb-3">
-                            <label htmlFor="remarks" className="form-label">
+                            <label htmlFor="remarks" className="form-label fw-bold">
                                 Remarks
                             </label>
                             <textarea
                                 id="remarks"
                                 className={`form-control${errors.remarks ? ' is-invalid' : ''}`}
-                                rows={4}
+                                rows={1}
                                 value={data.remarks}
+                                placeholder="Optional remarks about the plan"
                                 onChange={(event) => setData('remarks', event.target.value)}
                             />
                             {errors.remarks && <div className="invalid-feedback">{errors.remarks}</div>}
                         </div>
                     </div>
                 </div>
-                <div className="card-footer d-flex gap-2">
+                <div className="card-footer d-flex justify-content-end gap-2">
                     <button type="submit" className="btn btn-primary" disabled={processing}>
                         {processing ? 'Saving…' : plan ? 'Update plan' : 'Create plan'}
                     </button>

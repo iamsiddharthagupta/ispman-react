@@ -42,9 +42,6 @@ export default function Password() {
                     <div className="row justify-content-center">
                         <div className="col-lg-8 col-xl-6">
                             <div className="card">
-                                <div className="card-header">
-                                    <h3 className="card-title">Update your password</h3>
-                                </div>
                                 <div className="card-body">
                                     {recentlySuccessful && (
                                         <div className="alert alert-success" role="status">
@@ -101,11 +98,12 @@ export default function Password() {
                                                 required
                                             />
                                         </div>
-
-                                        <button type="submit" className="btn btn-primary" disabled={processing}>
-                                            {processing ? 'Updating password...' : 'Update password'}
-                                        </button>
                                     </form>
+                                </div>
+                                <div className="card-footer">
+                                    <button type="submit" className="btn btn-primary float-end" disabled={processing}>
+                                        {processing ? 'Updating password...' : 'Update password'}
+                                    </button>
                                 </div>
                             </div>
                         </div>

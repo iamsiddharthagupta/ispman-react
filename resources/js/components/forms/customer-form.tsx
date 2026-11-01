@@ -40,7 +40,7 @@ export default function CustomerForm({ customer, plans }: CustomerFormProps) {
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="username" className="form-label">
+                            <label htmlFor="username" className="form-label fw-bold">
                                 Username
                             </label>
                             <input
@@ -48,12 +48,13 @@ export default function CustomerForm({ customer, plans }: CustomerFormProps) {
                                 className={`form-control${errors.username ? ' is-invalid' : ''}`}
                                 value={data.username}
                                 onChange={(event) => setData('username', event.target.value)}
+                                placeholder="e.g. john_doe"
                                 required
                             />
                             {errors.username && <div className="invalid-feedback">{errors.username}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="name" className="form-label">
+                            <label htmlFor="name" className="form-label fw-bold">
                                 Full name
                             </label>
                             <input
@@ -61,12 +62,13 @@ export default function CustomerForm({ customer, plans }: CustomerFormProps) {
                                 className={`form-control${errors.name ? ' is-invalid' : ''}`}
                                 value={data.name}
                                 onChange={(event) => setData('name', event.target.value)}
+                                placeholder="e.g. John Doe"
                                 required
                             />
                             {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="phone" className="form-label">
+                            <label htmlFor="phone" className="form-label fw-bold">
                                 Phone
                             </label>
                             <input
@@ -74,13 +76,14 @@ export default function CustomerForm({ customer, plans }: CustomerFormProps) {
                                 type="tel"
                                 className={`form-control${errors.phone ? ' is-invalid' : ''}`}
                                 value={data.phone}
+                                placeholder="e.g. 1234567890"
                                 onChange={(event) => setData('phone', event.target.value)}
                                 required
                             />
                             {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="email" className="form-label">
+                            <label htmlFor="email" className="form-label fw-bold">
                                 Email
                             </label>
                             <input
@@ -88,37 +91,40 @@ export default function CustomerForm({ customer, plans }: CustomerFormProps) {
                                 type="email"
                                 className={`form-control${errors.email ? ' is-invalid' : ''}`}
                                 value={data.email}
+                                placeholder="e.g. 1JtHd@example.com"
                                 onChange={(event) => setData('email', event.target.value)}
                             />
                             {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="address_line_1" className="form-label">
-                                Address line 1
+                            <label htmlFor="address_line_1" className="form-label fw-bold">
+                                Address line 1 (Street, Building, etc.)
                             </label>
                             <input
                                 id="address_line_1"
                                 className={`form-control${errors.address_line_1 ? ' is-invalid' : ''}`}
                                 value={data.address_line_1}
+                                placeholder="e.g. Apt 123"
                                 onChange={(event) => setData('address_line_1', event.target.value)}
                                 required
                             />
                             {errors.address_line_1 && <div className="invalid-feedback">{errors.address_line_1}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="address_line_2" className="form-label">
-                                Address line 2
+                            <label htmlFor="address_line_2" className="form-label fw-bold">
+                                Address line 2 (Optional)
                             </label>
                             <input
                                 id="address_line_2"
                                 className={`form-control${errors.address_line_2 ? ' is-invalid' : ''}`}
                                 value={data.address_line_2}
+                                placeholder="e.g. Block A (Optional)"
                                 onChange={(event) => setData('address_line_2', event.target.value)}
                             />
                             {errors.address_line_2 && <div className="invalid-feedback">{errors.address_line_2}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="address_area" className="form-label">
+                            <label htmlFor="address_area" className="form-label fw-bold">
                                 Area
                             </label>
                             <select
@@ -138,7 +144,7 @@ export default function CustomerForm({ customer, plans }: CustomerFormProps) {
                             {errors.address_area && <div className="invalid-feedback">{errors.address_area}</div>}
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label htmlFor="plan_id" className="form-label">
+                            <label htmlFor="plan_id" className="form-label fw-bold">
                                 Internet plan
                             </label>
                             <select
@@ -147,7 +153,7 @@ export default function CustomerForm({ customer, plans }: CustomerFormProps) {
                                 value={data.plan_id}
                                 onChange={(event) => setData('plan_id', event.target.value)}
                             >
-                                <option value="">No plan assigned</option>
+                                <option value="">Select Internet plan</option>
                                 {plans.map((plan) => (
                                     <option key={plan.id} value={plan.id}>
                                         {plan.name} - {plan.vendor_name}
@@ -157,7 +163,7 @@ export default function CustomerForm({ customer, plans }: CustomerFormProps) {
                             {errors.plan_id && <div className="invalid-feedback">{errors.plan_id}</div>}
                         </div>
                         <div className="col-12 mb-3">
-                            <label htmlFor="remarks" className="form-label">
+                            <label htmlFor="remarks" className="form-label fw-bold">
                                 Remarks
                             </label>
                             <textarea
@@ -165,13 +171,14 @@ export default function CustomerForm({ customer, plans }: CustomerFormProps) {
                                 className={`form-control${errors.remarks ? ' is-invalid' : ''}`}
                                 rows={1}
                                 value={data.remarks}
+                                placeholder="e.g. This is a new customer"
                                 onChange={(event) => setData('remarks', event.target.value)}
                             />
                             {errors.remarks && <div className="invalid-feedback">{errors.remarks}</div>}
                         </div>
                     </div>
                 </div>
-                <div className="card-footer d-flex gap-2">
+                <div className="card-footer d-flex justify-content-end gap-2">
                     <button type="submit" className="btn btn-primary" disabled={processing}>
                         {processing ? 'Saving…' : customer ? 'Update customer' : 'Create customer'}
                     </button>

@@ -20,6 +20,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
     Route::resource('customers', CustomerController::class);
     Route::resource('plans', PlanController::class);
     Route::get('/renew-plan', [CustomerController::class, 'renewals'])->name('renew-plan.index');
@@ -29,7 +30,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/collect-payment', [PaymentController::class, 'store'])->name('collect-payment.store');
     Route::post('/customers/{customer}/renewals', [CustomerController::class, 'renewPlan'])->name('customers.renewals.store');
     Route::post('/customers/{customer}/payments', [CustomerController::class, 'recordPayment'])->name('customers.payments.store');
-    Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
     Route::patch('/customers/{customer}/status', [CustomerController::class, 'updateStatus'])->name('customers.status.update');
     Route::get('/settings/password', [PasswordController::class, 'edit'])->name('settings.password.edit');
     Route::put('/settings/password', [PasswordController::class, 'update'])->name('settings.password.update');
