@@ -13,7 +13,7 @@ export function appRoute(currentUrl: string, path: string): string {
     }
 
     const currentPath = currentUrl.split(/[?#]/, 1)[0];
-    const routeStart = currentPath.search(/\/(?:dashboard|plans|customers|renew-plan)(?:\/|$)/);
+    const routeStart = currentPath.search(/\/(?:dashboard|plans|customers|renew-plan|collect-payment)(?:\/|$)/);
     const basePath = routeStart === -1 ? '' : currentPath.slice(0, routeStart);
 
     return `${basePath}${path.startsWith('/') ? path : `/${path}`}`;

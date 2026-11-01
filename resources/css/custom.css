@@ -1,3 +1,7 @@
+body {
+  font-size: 15px;
+}
+
 /* ISPMan sidebar logo */
 
 .sidebar-brand .brand-link {
@@ -166,13 +170,13 @@
 .dashboard-section-heading h4 {
   margin: 0 0 4px;
   color: var(--bs-emphasis-color);
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 .dashboard-section-heading p {
   margin: 0;
   color: var(--bs-secondary-color);
-  font-size: 0.82rem;
+  font-size: 0.95rem;
 }
 .dashboard-period-badge {
   display: inline-flex;
@@ -219,13 +223,13 @@
 .dashboard-metric-title {
   margin: 0 0 9px;
   color: var(--bs-secondary-color);
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 600;
 }
 .dashboard-metric-value {
   margin: 0;
   color: var(--bs-emphasis-color);
-  font-size: clamp(1.55rem, 2vw, 1.9rem);
+  font-size: clamp(1.8rem, 2vw, 2.2rem);
   font-weight: 750;
   letter-spacing: -0.045em;
   line-height: 1.15;
@@ -266,7 +270,7 @@
   gap: 8px;
   margin-top: 16px;
   color: var(--bs-secondary-color);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 .dashboard-metric-footer i {
   color: var(--bs-tertiary-color);
@@ -292,13 +296,13 @@
 .dashboard-panel-header h5 {
   margin: 0 0 5px;
   color: var(--bs-emphasis-color);
-  font-size: 0.95rem;
+  font-size: 1.125rem;
   font-weight: 700;
 }
 .dashboard-panel-header p {
   margin: 0;
   color: var(--bs-secondary-color);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
 }
 .dashboard-panel-icon {
   width: 36px;
@@ -312,7 +316,7 @@
   gap: 18px;
   margin: 20px 0 4px;
   color: var(--bs-secondary-color);
-  font-size: 0.72rem;
+  font-size: 0.85rem;
 }
 .dashboard-chart-legend span {
   display: inline-flex;
@@ -351,7 +355,7 @@
 .dashboard-chart-axis {
   fill: var(--bs-secondary-color);
   font-family: inherit;
-  font-size: 10px;
+  font-size: 12px;
 }
 .dashboard-chart-bar-primary {
   fill: #3478f6;
@@ -380,7 +384,7 @@
   }
   .dashboard-period-badge {
     padding: 7px 9px;
-    font-size: 0.72rem;
+    font-size: 0.875rem;
   }
   .dashboard-metric-card {
     min-height: 140px;

@@ -152,10 +152,9 @@ export default function Index({ customers }: RenewalsIndexProps) {
                             disabled={bulkRenewal.processing || bulkRenewal.data.customer_ids.length === 0}
                         >
                             <i className="fas fa-arrows-rotate me-2" />
-                            {bulkRenewal.processing ? 'Renewing…' : `Bulk renew (${bulkRenewal.data.customer_ids.length})`}
+                            {bulkRenewal.processing ? 'Renewing…' : `Renew (${bulkRenewal.data.customer_ids.length})`}
                         </button>
                     </div>
-                    <p className="text-body-secondary mt-3 mb-0">Active customers whose current internet plan expires within the next five days.</p>
                 </div>
             </div>
             <div className="app-content">

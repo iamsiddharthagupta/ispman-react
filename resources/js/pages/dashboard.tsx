@@ -258,7 +258,7 @@ export default function Dashboard({ metrics, monthlyData }: DashboardProps) {
     <AdminLayout>
       <Head title="Dashboard" />
 
-      <div className="app-content-header">
+      {/* <div className="app-content-header">
         <div className="container-fluid">
           <div className="row align-items-center">
             <div className="col-sm-6">
@@ -279,9 +279,9 @@ export default function Dashboard({ metrics, monthlyData }: DashboardProps) {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
-      <div className="app-content">
+      <div className="app-content-header">
         <div className="container-fluid dashboard-content">
           <div className="dashboard-section-heading">
             <div>

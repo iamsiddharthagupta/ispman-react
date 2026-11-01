@@ -8,6 +8,7 @@ export default function Sidebar() {
     const customersUrl = appRoute(url, '/customers');
     const renewPlan = appRoute(url, '/renew-plan');
     const collectPayment = appRoute(url, '/collect-payment');
+    const changePassword = appRoute(url, '/settings/password');
 
     return (
         <aside className="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
@@ -86,7 +87,7 @@ export default function Sidebar() {
 
                         <li className="nav-header">Setting</li>
                         <li className="nav-item">
-                            <Link href="#" className="nav-link">
+                            <Link href={changePassword} className={`nav-link${url.split('?')[0].endsWith('/settings/password') ? ' active' : ''}`}>
                                 <i className="nav-icon fa-solid fa-gear" />
                                 <p>Change Password</p>
                             </Link>

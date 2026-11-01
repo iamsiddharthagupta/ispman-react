@@ -25,6 +25,33 @@ class CustomerCrudTest extends TestCase
         $this->get(route('customers.index'))->assertRedirect('/login');
     }
 
+    public function test_authenticated_users_can_search_customers_by_profile_fields(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $customer = Customer::create($this->validCustomerData());
+        Customer::create([
+            ...$this->validCustomerData(),
+            'username' => 'customer-02',
+            'name' => 'Jane Customer',
+            'phone' => '555-0102',
+            'email' => 'jane@example.com',
+        ]);
+
+        $this->getJson(route('customers.search', ['q' => '555-0101']))
+            ->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.id', $customer->id)
+            ->assertJsonPath('0.name', $customer->name)
+            ->assertJsonMissingPath('0.address_line_1');
+
+        $this->getJson(route('customers.search', ['q' => 'jane@example.com']))
+            ->assertOk()
+            ->assertJsonPath('0.username', 'customer-02');
+
+        $this->getJson(route('customers.search', ['q' => 'a']))
+            ->assertUnprocessable();
+    }
+
     public function test_authenticated_users_can_create_view_update_and_delete_a_customer(): void
     {
         $this->actingAs(User::factory()->create());

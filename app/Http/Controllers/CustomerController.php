@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Plan;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -55,6 +56,30 @@ class CustomerController extends Controller
         return Inertia::render('RenewPlan/Index', [
             'customers' => $customers,
         ]);
+    }
+
+    /**
+     * Search customers for the navbar.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'q' => ['required', 'string', 'min:2', 'max:100'],
+        ]);
+        $term = $validated['q'];
+
+        $customers = Customer::query()
+            ->where(function ($query) use ($term) {
+                $query->where('name', 'like', "%{$term}%")
+                    ->orWhere('username', 'like', "%{$term}%")
+                    ->orWhere('phone', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%");
+            })
+            ->orderBy('name')
+            ->limit(8)
+            ->get(['id', 'name', 'username', 'phone', 'email']);
+
+        return response()->json($customers);
     }
 
     /**

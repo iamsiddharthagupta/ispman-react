@@ -286,12 +286,12 @@ export default function Show({ customer, plans }: ShowProps) {
             style: { paddingRight: '12px' },
             grow: 0.75,
             cell: (order) =>
-                Number(order.due_amount) > 0 || order.id === latestOrder?.id ? (
+                Number(order.due_amount) > 0 ? (
                     <button
                         type="button"
                         className="btn btn-sm btn-success text-nowrap"
-                        aria-label={Number(order.due_amount) > 0 ? 'Add payment' : 'Add advance payment'}
-                        title={Number(order.due_amount) > 0 ? 'Add payment' : 'Add advance payment'}
+                        aria-label="Add payment"
+                        title="Add payment"
                         onClick={() => openPaymentModal(order)}
                     >
                         <i className="fas fa-plus" />
@@ -546,118 +546,162 @@ export default function Show({ customer, plans }: ShowProps) {
                                 <form onSubmit={submitPayment}>
                                     <div className="modal-header">
                                         <div>
-                                            <h5 className="modal-title" id="payment-modal-title">
-                                                Add payment
-                                            </h5>
-                                            <div className="small text-body-secondary">
-                                                {formatDate(paymentOrder.start_date)} - {formatDate(paymentOrder.end_date)} · {paymentOrder.plan_name}{' '}
-                                                · {Number(paymentOrder.due_amount) < 0 ? 'Credit' : 'Balance'}{' '}
-                                                {formatMoney(Math.abs(Number(paymentOrder.due_amount)))}
-                                            </div>
+                                        <h5 className="modal-title" id="payment-modal-title">
+                                            Add payment
+                                        </h5>
+                                        <div className="small text-body-secondary mt-1">
+                                            {formatDate(paymentOrder.start_date)} - {formatDate(paymentOrder.end_date)}
+                                            <span className="mx-2 text-muted">·</span>
+                                            {paymentOrder.plan_name}
+                                            <span className="mx-2 text-muted">·</span>
+                                            <span className={Number(paymentOrder.due_amount) < 0 ? 'text-success fw-medium' : 'text-danger fw-medium'}>
+                                            {Number(paymentOrder.due_amount) < 0 ? 'Credit' : 'Balance'}{' '}
+                                            {formatMoney(Math.abs(Number(paymentOrder.due_amount)))}
+                                            </span>
+                                        </div>
                                         </div>
                                         <button type="button" className="btn-close" aria-label="Close" onClick={closePaymentModal} />
                                     </div>
+
                                     <div className="modal-body">
-                                        <div className="row">
-                                            <div className="col-md-6 mb-3">
-                                                <label htmlFor="paid_amount" className="form-label">
-                                                    Paid amount
-                                                </label>
-                                                <input
-                                                    id="paid_amount"
-                                                    type="number"
-                                                    min="0.01"
-                                                    step="0.01"
-                                                    className={`form-control${payment.errors.paid_amount ? ' is-invalid' : ''}`}
-                                                    value={payment.data.paid_amount}
-                                                    onChange={(event) => payment.setData('paid_amount', event.target.value)}
-                                                    required
-                                                />
-                                                {payment.errors.paid_amount && <div className="invalid-feedback">{payment.errors.paid_amount}</div>}
-                                                <div className="form-text">
-                                                    You can collect more than the current balance; any extra will be applied to the next renewal.
-                                                </div>
+                                        <div className="row g-3 mb-4">
+                                        <div className="col-md-6">
+                                            <label htmlFor="paid_amount" className="form-label mb-1">
+                                            Paid amount
+                                            </label>
+                                            <div className="input-group has-validation">
+                                            <input
+                                                id="paid_amount"
+                                                type="number"
+                                                min="0.01"
+                                                step="0.01"
+                                                className={`form-control${payment.errors.paid_amount ? ' is-invalid' : ''}`}
+                                                value={payment.data.paid_amount}
+                                                onChange={(event) => payment.setData('paid_amount', event.target.value)}
+                                                required
+                                            />
+                                            {payment.errors.paid_amount && (
+                                                <div className="invalid-feedback">{payment.errors.paid_amount}</div>
+                                            )}
                                             </div>
-                                            <div className="col-md-6 mb-3">
-                                                <label htmlFor="payment_date" className="form-label">
-                                                    Payment date
-                                                </label>
-                                                <input
-                                                    id="payment_date"
-                                                    type="date"
-                                                    lang="en-GB"
-                                                    className={`form-control${payment.errors.payment_date ? ' is-invalid' : ''}`}
-                                                    value={payment.data.payment_date}
-                                                    onChange={(event) => payment.setData('payment_date', event.target.value)}
-                                                    required
-                                                />
-                                                {payment.errors.payment_date && <div className="invalid-feedback">{payment.errors.payment_date}</div>}
-                                            </div>
-                                            <div className="col-md-6 mb-3">
-                                                <label htmlFor="payment_mode" className="form-label">
-                                                    Payment mode
-                                                </label>
-                                                <select
-                                                    id="payment_mode"
-                                                    className={`form-select${payment.errors.mode ? ' is-invalid' : ''}`}
-                                                    value={payment.data.mode}
-                                                    onChange={(event) => payment.setData('mode', event.target.value)}
-                                                    required
-                                                >
-                                                    <option value="Cash">Cash</option>
-                                                    <option value="Online">Online</option>
-                                                    <option value="Cheque">Cheque</option>
-                                                </select>
-                                                {payment.errors.mode && <div className="invalid-feedback">{payment.errors.mode}</div>}
-                                            </div>
-                                            <div className="col-md-6 mb-3">
-                                                <label htmlFor="payment_remarks" className="form-label">
-                                                    Remarks
-                                                </label>
-                                                <textarea
-                                                    id="payment_remarks"
-                                                    className={`form-control${payment.errors.remarks ? ' is-invalid' : ''}`}
-                                                    rows={1}
-                                                    value={payment.data.remarks}
-                                                    onChange={(event) => payment.setData('remarks', event.target.value)}
-                                                />
-                                                {payment.errors.remarks && <div className="invalid-feedback">{payment.errors.remarks}</div>}
+                                            <div className="form-text mt-1 lh-sm text-muted" style={{ fontSize: '0.825rem' }}>
+                                            You can collect more than the current balance; any extra will be applied to the next renewal.
                                             </div>
                                         </div>
 
-                                        <h6 className="fw-semibold">Previous payments on this renewal</h6>
+                                        <div className="col-md-6">
+                                            <label htmlFor="payment_date" className="form-label mb-1">
+                                            Payment date
+                                            </label>
+                                            <input
+                                            id="payment_date"
+                                            type="date"
+                                            lang="en-GB"
+                                            className={`form-control${payment.errors.payment_date ? ' is-invalid' : ''}`}
+                                            value={payment.data.payment_date}
+                                            onChange={(event) => payment.setData('payment_date', event.target.value)}
+                                            required
+                                            />
+                                            {payment.errors.payment_date && (
+                                            <div className="invalid-feedback">{payment.errors.payment_date}</div>
+                                            )}
+                                        </div>
+
+                                        <div className="col-md-6">
+                                            <label htmlFor="payment_mode" className="form-label mb-1">
+                                            Payment mode
+                                            </label>
+                                            <select
+                                            id="payment_mode"
+                                            className={`form-select${payment.errors.mode ? ' is-invalid' : ''}`}
+                                            value={payment.data.mode}
+                                            onChange={(event) => payment.setData('mode', event.target.value)}
+                                            required
+                                            >
+                                            <option value="Cash">Cash</option>
+                                            <option value="Online">Online</option>
+                                            <option value="Cheque">Cheque</option>
+                                            </select>
+                                            {payment.errors.mode && <div className="invalid-feedback">{payment.errors.mode}</div>}
+                                        </div>
+
+                                        <div className="col-md-6">
+                                            <label htmlFor="payment_remarks" className="form-label mb-1">
+                                            Remarks
+                                            </label>
+                                            <textarea
+                                            id="payment_remarks"
+                                            className={`form-control${payment.errors.remarks ? ' is-invalid' : ''}`}
+                                            rows={1}
+                                            style={{ resize: 'none' }}
+                                            value={payment.data.remarks}
+                                            onChange={(event) => payment.setData('remarks', event.target.value)}
+                                            />
+                                            {payment.errors.remarks && <div className="invalid-feedback">{payment.errors.remarks}</div>}
+                                        </div>
+                                        </div>
+
+                                        <div className="border-top pt-3">
+                                        <h6 className="fw-semibold mb-3 d-flex align-items-center">
+                                            <i className="bi bi-clock-history me-1 text-secondary"></i>
+                                            Previous payments on this renewal
+                                        </h6>
+                                        
                                         {paymentOrder.payments.length > 0 ? (
-                                            <div className="table-responsive">
-                                                <table className="table table-sm align-middle mb-0">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Date</th>
-                                                            <th>Mode</th>
-                                                            <th className="text-end">Paid</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {paymentOrder.payments.map((entry) => (
-                                                            <tr key={entry.id}>
-                                                                <td>{formatDate(entry.payment_date)}</td>
-                                                                <td>{entry.mode}</td>
-                                                                <td className="text-end">{formatMoney(entry.paid_amount)}</td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
+                                            <div className="table-responsive rounded-2 border">
+                                            <table className="table table-sm table-striped table-hover align-middle mb-0">
+                                                <thead className="table-light">
+                                                <tr>
+                                                    <th className="ps-3 py-2 text-muted fw-semibold" style={{ fontSize: '0.85rem' }}>Date</th>
+                                                    <th className="py-2 text-muted fw-semibold" style={{ fontSize: '0.85rem' }}>Mode</th>
+                                                    <th className="pe-3 py-2 text-end text-muted fw-semibold" style={{ fontSize: '0.85rem' }}>Paid</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {paymentOrder.payments.map((entry) => (
+                                                    <tr key={entry.id}>
+                                                    <td className="ps-3 py-2">{formatDate(entry.payment_date)}</td>
+                                                    <td className="py-2">
+                                                        <span className={`badge rounded-pill px-2.5 py-1 text-xs ${
+                                                        entry.mode === 'Online' ? 'bg-primary-subtle text-primary border border-primary-subtle' :
+                                                        entry.mode === 'Cash' ? 'bg-success-subtle text-success border border-success-subtle' :
+                                                        'bg-warning-subtle text-warning border border-warning-subtle'
+                                                        }`}>
+                                                        {entry.mode}
+                                                        </span>
+                                                    </td>
+                                                    <td className="pe-3 py-2 text-end fw-medium text-dark">
+                                                        {formatMoney(entry.paid_amount)}
+                                                    </td>
+                                                    </tr>
+                                                ))}
+                                                </tbody>
+                                            </table>
                                             </div>
                                         ) : (
-                                            <div className="small text-body-secondary">No payments have been added to this renewal.</div>
+                                            <div className="alert alert-light border border-dashed rounded-3 p-3 text-center mb-0">
+                                            <span className="small text-muted">
+                                                <i className="bi bi-info-circle me-1"></i>
+                                                No payments have been added to this renewal.
+                                            </span>
+                                            </div>
                                         )}
+                                        </div>
                                     </div>
-                                    <div className="modal-footer">
-                                        <button type="button" className="btn btn-secondary" onClick={closePaymentModal}>
-                                            Cancel
+
+                                    <div className="modal-footer bg-light-subtle border-top">
+                                        <button type="button" className="btn btn-secondary px-3" onClick={closePaymentModal}>
+                                        Cancel
                                         </button>
-                                        <button type="submit" className="btn btn-success" disabled={payment.processing}>
-                                            {payment.processing && <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />}
-                                            {payment.processing ? 'Saving…' : 'Save payment'}
+                                        <button type="submit" className="btn btn-success px-4" disabled={payment.processing}>
+                                        {payment.processing ? (
+                                            <>
+                                            <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
+                                            Saving…
+                                            </>
+                                        ) : (
+                                            'Save payment'
+                                        )}
                                         </button>
                                     </div>
                                 </form>

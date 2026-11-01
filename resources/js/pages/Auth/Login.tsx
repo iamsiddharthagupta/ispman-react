@@ -92,7 +92,7 @@ export default function Login({ status, canResetPassword = false }: LoginProps) 
                                 </div>
                                 <div className="col-4">
                                     <button type="submit" className="btn btn-primary w-100" disabled={processing}>
-                                        {processing ? 'Signing in...' : 'Sign in'}
+                                        {processing ? 'Wait...' : 'Sign in'}
                                     </button>
                                 </div>
                             </div>

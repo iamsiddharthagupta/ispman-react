@@ -1,9 +1,24 @@
-import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { FormEvent, useEffect, useState } from 'react';
 import { ColorTheme, getSavedColorTheme, saveColorTheme } from '../../lib/color-theme';
+import { appRoute } from '../../lib/app-route';
+
+interface CustomerSearchResult {
+    id: number;
+    name: string;
+    username: string;
+    phone: string;
+    email: string | null;
+}
+
+type CustomerSearchStatus = 'idle' | 'loading' | 'results' | 'empty' | 'error';
 
 export default function Navbar() {
     const [colorTheme, setSelectedColorTheme] = useState<ColorTheme>(getSavedColorTheme);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<CustomerSearchResult[]>([]);
+    const [searchStatus, setSearchStatus] = useState<CustomerSearchStatus>('idle');
+    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
     const { auth } = usePage<{
         auth: {
             user: {
@@ -12,6 +27,7 @@ export default function Navbar() {
             } | null;
         };
     }>().props;
+    const { url } = usePage();
     const user = auth.user;
     const name = user?.name ?? 'User';
     const initials =
@@ -24,9 +40,68 @@ export default function Navbar() {
             .join('')
             .toUpperCase() || 'U';
 
+    useEffect(() => {
+        const query = searchQuery.trim();
+
+        if (query.length < 2) {
+            setSearchResults([]);
+            setSearchStatus('idle');
+            return;
+        }
+
+        const controller = new AbortController();
+        setSearchResults([]);
+        setSearchStatus('loading');
+
+        const timeout = window.setTimeout(async () => {
+            try {
+                const response = await fetch(
+                    appRoute(url, `/customers/search?q=${encodeURIComponent(query)}`),
+                    {
+                        headers: { Accept: 'application/json' },
+                        signal: controller.signal,
+                    },
+                );
+
+                if (!response.ok) {
+                    throw new Error(`Customer search failed with status ${response.status}`);
+                }
+
+                const results = (await response.json()) as CustomerSearchResult[];
+                setSearchResults(results);
+                setSearchStatus(results.length > 0 ? 'results' : 'empty');
+            } catch {
+                if (!controller.signal.aborted) {
+                    setSearchResults([]);
+                    setSearchStatus('error');
+                }
+            }
+        }, 250);
+
+        return () => {
+            window.clearTimeout(timeout);
+            controller.abort();
+        };
+    }, [searchQuery, url]);
+
+    function submitSearch(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        if (searchResults[0]) {
+            router.visit(appRoute(url, `/customers/${searchResults[0].id}`));
+        }
+    }
+
+    function clearSearch() {
+        setSearchQuery('');
+        setSearchResults([]);
+        setSearchStatus('idle');
+        setMobileSearchOpen(false);
+    }
+
     return (
         <nav className="app-header navbar navbar-expand bg-body">
-            <div className="container-fluid">
+            <div className="container-fluid position-relative">
 
                 {/* Start Navbar Links */}
                 <ul className="navbar-nav">
@@ -52,12 +127,28 @@ export default function Navbar() {
 
                 {/* Navbar Search */}
                 <form
-                className="navbar-search d-none d-md-block ms-3"
+                className={`navbar-search ms-3 position-relative ${mobileSearchOpen ? '' : 'd-none d-md-block'}`}
                 role="search"
-                action=""
+                onSubmit={submitSearch}
+                style={
+                    mobileSearchOpen
+                        ? {
+                              position: 'absolute',
+                              top: '100%',
+                              left: 0,
+                              right: 0,
+                              width: 'auto',
+                              zIndex: 1030,
+                              margin: 0,
+                              padding: '0.75rem',
+                              background: 'var(--bs-body-bg)',
+                              boxShadow: 'var(--bs-box-shadow)',
+                          }
+                        : undefined
+                }
                 >
                 <label htmlFor="navbar-search-input" className="visually-hidden">
-                    Search
+                    Search customers
                 </label>
 
                 <div className="navbar-search-field">
@@ -66,18 +157,62 @@ export default function Navbar() {
                     id="navbar-search-input"
                     name="q"
                     className="form-control"
-                    placeholder="Search…"
+                    placeholder="Search customers…"
                     autoComplete="off"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    aria-label="Search customers by name, username, phone, or email"
+                    aria-expanded={searchQuery.trim().length > 0}
+                    aria-controls="navbar-customer-search-results"
                     />
 
                     <button
                     className="navbar-search-submit"
                     type="submit"
-                    aria-label="Submit search"
+                    aria-label="Open first matching customer"
                     >
                     <i className="bi bi-search" aria-hidden="true"></i>
                     </button>
                 </div>
+                {searchQuery.trim().length > 0 && (
+                    <div
+                        id="navbar-customer-search-results"
+                        className="dropdown-menu show w-100 mt-1"
+                        role="listbox"
+                    >
+                        {searchQuery.trim().length < 2 && (
+                            <span className="dropdown-item-text text-body-secondary">
+                                Enter at least 2 characters to search.
+                            </span>
+                        )}
+                        {searchStatus === 'loading' && (
+                            <span className="dropdown-item-text text-body-secondary">Searching customers…</span>
+                        )}
+                        {searchStatus === 'empty' && (
+                            <span className="dropdown-item-text text-body-secondary">No customers found.</span>
+                        )}
+                        {searchStatus === 'error' && (
+                            <span className="dropdown-item-text text-danger">
+                                Unable to search customers. Please try again.
+                            </span>
+                        )}
+                        {searchResults.map((customer) => (
+                            <Link
+                                key={customer.id}
+                                href={appRoute(url, `/customers/${customer.id}`)}
+                                className="dropdown-item text-wrap"
+                                role="option"
+                                aria-selected="false"
+                                onClick={clearSearch}
+                            >
+                                <span className="d-block fw-semibold">{customer.name}</span>
+                                <small className="text-body-secondary">
+                                    {customer.username} · {customer.phone}
+                                </small>
+                            </Link>
+                        ))}
+                    </div>
+                )}
                 </form>
 
                 {/* End Navbar Links */}
@@ -85,13 +220,15 @@ export default function Navbar() {
 
                 {/* Mobile Search */}
                 <li className="nav-item d-md-none">
-                    <a
-                    className="nav-link"
-                    href="./pages/search-results.html"
-                    aria-label="Search"
+                    <button
+                    className="nav-link border-0 bg-transparent"
+                    type="button"
+                    aria-label={mobileSearchOpen ? 'Close customer search' : 'Search customers'}
+                    aria-expanded={mobileSearchOpen}
+                    onClick={() => setMobileSearchOpen((open) => !open)}
                     >
                     <i className="bi bi-search" aria-hidden="true"></i>
-                    </a>
+                    </button>
                 </li>
 
                 {/* Notifications Dropdown */}

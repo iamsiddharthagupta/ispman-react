@@ -62,7 +62,6 @@ export default function Index({ customers, sorting }: CustomerIndexProps) {
                 selector: (customer) => customer.name,
                 sortField: 'name',
                 sortable: true,
-                minWidth: '200px',
                 cell: (customer) => (
                     <div className="d-flex align-items-center">
                         <div className="fw-semibold text-body">{customer.name}</div>
@@ -77,18 +76,40 @@ export default function Index({ customers, sorting }: CustomerIndexProps) {
                 sortable: true,
             },
             {
-                id: 'email',
-                name: 'EMAIL',
-                selector: (customer) => customer.email ?? '',
-                sortField: 'email',
+                id: 'address',
+                name: 'ADDRESS',
+                sortField: 'address_line_1',
                 sortable: true,
-                cell: (customer) => <span className="text-body-secondary">{customer.email || '—'}</span>,
+                selector: (customer) => {
+                    return [customer.address_line_1, customer.address_line_2]
+                    .filter(Boolean)
+                    .join(', ');
+                },
+                cell: (customer) => {
+                    const fullAddress = [customer.address_line_1, customer.address_line_2]
+                    .filter(Boolean)
+                    .join(', ');
+
+                    return (
+                    <span className="text-body">
+                        {fullAddress || '—'}
+                    </span>
+                    );
+                },
+            },
+            {
+                id: 'address_area',
+                name: 'AREA',
+                sortField: 'address_area',
+                sortable: true,
+                selector: (customer) => customer.address_area ?? '',
+                cell: (customer) => <span className="text-body">{customer.address_area ?? '—'}</span>,
             },
             {
                 id: 'plan',
                 name: 'INTERNET PLAN',
                 selector: (customer) => customer.plan?.name ?? '',
-                cell: (customer) => <span className="text-body">{customer.plan?.name ?? '—'}</span>,
+                cell: (customer) => <span className="fw-semibold text-body">{customer.plan?.name ?? '—'}</span>,
             },
             {
                 id: 'status',
