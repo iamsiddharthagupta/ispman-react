@@ -77,6 +77,38 @@ class PlanCrudTest extends TestCase
         ])->assertSessionHasErrors(['price', 'duration', 'status']);
     }
 
+    public function test_plan_status_can_be_toggled_without_updating_other_fields(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $plan = Plan::create($this->validPlanData());
+
+        $this->from(route('plans.index'))
+            ->patch(route('plans.status.update', $plan), ['status' => 0])
+            ->assertRedirect(route('plans.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('plans', [
+            'id' => $plan->id,
+            'status' => 0,
+            'name' => $plan->name,
+        ]);
+
+        $this->from(route('plans.index'))
+            ->patch(route('plans.status.update', $plan), ['status' => 1])
+            ->assertRedirect(route('plans.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('plans', [
+            'id' => $plan->id,
+            'status' => 1,
+            'name' => $plan->name,
+        ]);
+
+        $this->from(route('plans.index'))
+            ->patch(route('plans.status.update', $plan), ['status' => 2])
+            ->assertSessionHasErrors('status');
+    }
+
     public function test_plan_list_can_be_sorted_without_filtering(): void
     {
         $this->actingAs(User::factory()->create());

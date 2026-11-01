@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DataTable, { TableColumn } from 'react-data-table-component';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import AdminLayout from '../../layouts/dashboard-layout';
 import { appRoute } from '../../lib/app-route';
 import { Customer } from '../../types/customer';
@@ -18,6 +18,7 @@ interface CustomerIndexProps {
 
 export default function Index({ customers, sorting }: CustomerIndexProps) {
     const { url } = usePage();
+    const [pendingStatusUpdates, setPendingStatusUpdates] = useState<Set<number>>(() => new Set());
 
     function visitCustomers(params: { page?: number; sort?: string; direction?: string }) {
         router.get(
@@ -28,6 +29,28 @@ export default function Index({ customers, sorting }: CustomerIndexProps) {
                 page: params.page ?? customers.current_page,
             },
             { preserveState: true, preserveScroll: true, replace: true },
+        );
+    }
+
+    function toggleCustomerStatus(customer: Customer) {
+        if (pendingStatusUpdates.has(customer.id)) {
+            return;
+        }
+
+        setPendingStatusUpdates((pending) => new Set(pending).add(customer.id));
+        router.patch(
+            appRoute(url, `/customers/${customer.id}/status`),
+            { status: customer.status === 1 ? 0 : 1 },
+            {
+                preserveScroll: true,
+                onFinish: () => {
+                    setPendingStatusUpdates((pending) => {
+                        const next = new Set(pending);
+                        next.delete(customer.id);
+                        return next;
+                    });
+                },
+            },
         );
     }
 
@@ -64,7 +87,10 @@ export default function Index({ customers, sorting }: CustomerIndexProps) {
                 sortable: true,
                 cell: (customer) => (
                     <div className="d-flex align-items-center">
-                        <div className="fw-semibold text-body">{customer.name}</div>
+                        <Link href={appRoute(url, `/customers/${customer.id}`)} className="fw-semibold text-body text-decoration-none">
+                            {customer.name}
+                            <div className="small text-body-secondary">{customer.username}</div>
+                        </Link>
                     </div>
                 ),
             },
@@ -103,14 +129,35 @@ export default function Index({ customers, sorting }: CustomerIndexProps) {
                 sortField: 'address_area',
                 sortable: true,
                 selector: (customer) => customer.address_area ?? '',
-                cell: (customer) => <span className="text-body">{customer.address_area ?? '—'}</span>,
+                cell: (customer) => {
+                    const area = customer.address_area ?? '—';
+                    const limit = 15;
+                    const truncatedArea = area.length > limit ? `${area.substring(0, limit)}...` : area;
+
+                    return (
+                        <span className="text-body" title={area !== '—' ? area : undefined}>
+                            {truncatedArea}
+                        </span>
+                    );
+                },
             },
             {
-                id: 'plan',
-                name: 'INTERNET PLAN',
-                selector: (customer) => customer.plan?.name ?? '',
-                cell: (customer) => <span className="fw-semibold text-body">{customer.plan?.name ?? '—'}</span>,
+            id: 'plan',
+            name: 'INTERNET PLAN',
+            selector: (customer) => customer.plan?.name ?? '',
+            cell: (customer) => {
+                const planName = customer.plan?.name ?? '—';
+                const limit = 15; // Limit the number of characters to display
+                const truncatedName = planName.length > limit ? `${planName.substring(0, limit)}...` : planName;
+                
+                return (
+                <span className="fw-semibold text-body" title={planName !== '—' ? planName : undefined}>
+                    {truncatedName}
+                </span>
+                );
             },
+            },
+
             {
                 id: 'status',
                 name: 'STATUS',
@@ -118,10 +165,20 @@ export default function Index({ customers, sorting }: CustomerIndexProps) {
                 sortField: 'status',
                 sortable: true,
                 cell: (customer) => (
-                    <span className={`badge rounded-pill px-3 py-2 ${customer.status === 1 ? 'text-bg-success' : 'text-bg-secondary'}`}>
-                        <i className={`fas ${customer.status === 1 ? 'fa-check-circle' : 'fa-pause-circle'} me-1`} />
-                        {customer.status === 1 ? 'Active' : 'Inactive'}
-                    </span>
+                    <div className="form-check form-switch d-flex align-items-center gap-2 mb-0">
+                        <input
+                            className="form-check-input m-0"
+                            type="checkbox"
+                            role="switch"
+                            checked={customer.status === 1}
+                            disabled={pendingStatusUpdates.has(customer.id)}
+                            aria-label={`Set ${customer.name} ${customer.status === 1 ? 'inactive' : 'active'}`}
+                            onChange={() => toggleCustomerStatus(customer)}
+                        />
+                        <span className={customer.status === 1 ? 'text-success' : 'text-body-secondary'}>
+                            {customer.status === 1 ? 'On' : 'Off'}
+                        </span>
+                    </div>
                 ),
             },
             {
@@ -165,7 +222,7 @@ export default function Index({ customers, sorting }: CustomerIndexProps) {
                 ),
             },
         ],
-        [url],
+        [url, pendingStatusUpdates],
     );
 
     return (

@@ -78,6 +78,16 @@ class PlanController extends Controller
         return redirect()->route('plans.index');
     }
 
+    public function updateStatus(Request $request, Plan $plan)
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'integer', 'in:0,1'],
+        ]);
+        $plan->update(['status' => $validated['status']]);
+
+        return redirect()->back();
+    }
+
     /**
      * Remove the specified resource from storage.
      */

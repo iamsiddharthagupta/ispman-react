@@ -16,7 +16,9 @@ interface CollectionOrder {
     customer: {
         id: number;
         name: string;
-        username: string;
+        address_line_1: string;
+        address_line_2: string | null;
+        address_area: string;
         phone: string;
     };
 }
@@ -145,7 +147,7 @@ export default function Index({ orders, search }: CollectPaymentProps) {
                         >
                             {order.customer.name}
                         </Link>
-                        <div className="small text-body-secondary">{order.customer.username} · {order.customer.phone}</div>
+                        <div className="small text-body-secondary">{order.customer.address_line_1} · {order.customer.address_line_2} · {order.customer.address_area} · {order.customer.phone}</div>
                     </div>
                 ),
             },
@@ -246,7 +248,7 @@ export default function Index({ orders, search }: CollectPaymentProps) {
                         <div className="card border-0 shadow-sm mb-3">
                             <div className="card-body">
                                 <div className="row g-3 align-items-end">
-                                    <div className="col-lg-5">
+                                    <div className="col-lg-4">
                                         <label htmlFor="payment-customer-search" className="form-label">Find a customer</label>
                                         <form onSubmit={submitSearch}>
                                             <div className="input-group">
@@ -264,7 +266,7 @@ export default function Index({ orders, search }: CollectPaymentProps) {
                                             </div>
                                         </form>
                                     </div>
-                                    <div className="col-sm-6 col-lg-3">
+                                    <div className="col-sm-6 col-lg-2">
                                         <label htmlFor="payment-date" className="form-label">Payment date</label>
                                         <input
                                             id="payment-date"
@@ -275,7 +277,7 @@ export default function Index({ orders, search }: CollectPaymentProps) {
                                             required
                                         />
                                     </div>
-                                    <div className="col-sm-6 col-lg-4">
+                                    <div className="col-sm-6 col-lg-2">
                                         <label htmlFor="payment-mode" className="form-label">Payment mode</label>
                                         <select
                                             id="payment-mode"
@@ -289,7 +291,7 @@ export default function Index({ orders, search }: CollectPaymentProps) {
                                             <option value="Cheque">Cheque</option>
                                         </select>
                                     </div>
-                                    <div className="col-12">
+                                    <div className="col-lg-4">
                                         <label htmlFor="payment-remarks" className="form-label">Remarks <span className="text-body-secondary">(optional)</span></label>
                                         <input
                                             id="payment-remarks"

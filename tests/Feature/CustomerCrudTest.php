@@ -140,6 +140,38 @@ class CustomerCrudTest extends TestCase
             ->assertSessionHasNoErrors();
     }
 
+    public function test_customer_status_can_be_toggled_without_updating_other_fields(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $customer = Customer::create($this->validCustomerData());
+
+        $this->from(route('customers.index'))
+            ->patch(route('customers.status.update', $customer), ['status' => 0])
+            ->assertRedirect(route('customers.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('customers', [
+            'id' => $customer->id,
+            'status' => 0,
+            'name' => $customer->name,
+        ]);
+
+        $this->from(route('customers.index'))
+            ->patch(route('customers.status.update', $customer), ['status' => 1])
+            ->assertRedirect(route('customers.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('customers', [
+            'id' => $customer->id,
+            'status' => 1,
+            'name' => $customer->name,
+        ]);
+
+        $this->from(route('customers.index'))
+            ->patch(route('customers.status.update', $customer), ['status' => 2])
+            ->assertSessionHasErrors('status');
+    }
+
     public function test_customer_can_renew_a_plan_and_record_payments_against_the_renewal(): void
     {
         Carbon::setTestNow('2026-10-30 12:00:00');

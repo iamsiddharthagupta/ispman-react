@@ -88,7 +88,7 @@ export default function Index({ customers }: RenewalsIndexProps) {
                         <Link href={appRoute(url, `/customers/${customer.id}`)} className="fw-semibold text-body text-decoration-none">
                             {customer.name}
                         </Link>
-                        <div className="small text-body-secondary">{customer.username}</div>
+                        <div className="small text-body-secondary">{customer.address_line_1} · {customer.address_line_2} · {customer.address_area} · {customer.phone}</div>
                     </div>
                 ),
             },

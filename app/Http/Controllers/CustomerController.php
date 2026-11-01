@@ -309,6 +309,16 @@ class CustomerController extends Controller
         return redirect()->route('customers.index');
     }
 
+    public function updateStatus(Request $request, Customer $customer)
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'integer', 'in:0,1'],
+        ]);
+        $customer->update(['status' => $validated['status']]);
+
+        return redirect()->back();
+    }
+
     /**
      * Remove the specified resource from storage.
      */

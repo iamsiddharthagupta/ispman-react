@@ -21,7 +21,7 @@ class PaymentController extends Controller
 
         return Inertia::render('CollectPayment/Index', [
             'orders' => Order::query()
-                ->with('customer:id,name,username,phone')
+                ->with('customer:id,name,username,address_line_1,address_line_2,address_area,phone')
                 ->where('due_amount', '>', 0)
                 ->when($search !== '', function ($query) use ($search) {
                     $query->whereHas('customer', function ($customerQuery) use ($search) {

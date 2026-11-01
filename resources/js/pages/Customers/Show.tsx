@@ -163,8 +163,6 @@ export default function Show({ customer, plans }: ShowProps) {
                 fontWeight: '700',
                 letterSpacing: '0.055em',
                 color: 'var(--bs-secondary-color)',
-                paddingLeft: '12px',
-                paddingRight: '12px',
             },
         },
         rows: {
@@ -176,8 +174,6 @@ export default function Show({ customer, plans }: ShowProps) {
         },
         cells: {
             style: {
-                // paddingLeft: '12px',
-                // paddingRight: '12px',
                 paddingTop: '5px',
                 paddingBottom: '5px',
                 fontSize: '15px',
@@ -245,7 +241,7 @@ export default function Show({ customer, plans }: ShowProps) {
                     <div>{formatMoney(order.plan_price)}</div>
                     {Number(order.balance_adjustment) !== 0 && (
                         <div className={`small ${Number(order.balance_adjustment) > 0 ? 'text-danger' : 'text-success'}`}>
-                        {Number(order.balance_adjustment) > 0 ? '- Balance' : '+ Credit'}{' '}
+                        {/* {Number(order.balance_adjustment) > 0 ? '- Balance' : '+ Credit'}{' '} */}
                         {formatMoney(Math.abs(Number(order.balance_adjustment)))}
                         </div>
                     )}
@@ -304,7 +300,7 @@ export default function Show({ customer, plans }: ShowProps) {
 
     return (
         <AdminLayout>
-            <Head title={`${customer.name} profile`} />
+            <Head title={`${customer.name} Profile`} />
             <div className="app-content-header">
                 <div className="container-fluid">
                     <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">

@@ -1,7 +1,7 @@
 
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import DataTable, { TableColumn } from 'react-data-table-component';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import AdminLayout from '../../layouts/dashboard-layout';
 import { appRoute } from '../../lib/app-route';
 import { Plan } from '../../types/plan';
@@ -19,6 +19,7 @@ interface PlanIndexProps {
 
 export default function Index({ plans, sorting }: PlanIndexProps) {
     const { url } = usePage();
+    const [pendingStatusUpdates, setPendingStatusUpdates] = useState<Set<number>>(() => new Set());
 
     function visitPlans(params: {
         page?: number;
@@ -36,6 +37,28 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                 preserveState: true,
                 preserveScroll: true,
                 replace: true,
+            },
+        );
+    }
+
+    function togglePlanStatus(plan: Plan) {
+        if (pendingStatusUpdates.has(plan.id)) {
+            return;
+        }
+
+        setPendingStatusUpdates((pending) => new Set(pending).add(plan.id));
+        router.patch(
+            appRoute(url, `/plans/${plan.id}/status`),
+            { status: plan.status === 1 ? 0 : 1 },
+            {
+                preserveScroll: true,
+                onFinish: () => {
+                    setPendingStatusUpdates((pending) => {
+                        const next = new Set(pending);
+                        next.delete(plan.id);
+                        return next;
+                    });
+                },
             },
         );
     }
@@ -140,22 +163,20 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                 sortField: 'status',
                 sortable: true,
                 cell: plan => (
-                    <span
-                        className={`badge rounded-pill px-3 py-2 ${
-                            plan.status === 1
-                                ? 'text-bg-success'
-                                : 'text-bg-secondary'
-                        }`}
-                    >
-                        <i
-                            className={`fas ${
-                                plan.status === 1
-                                    ? 'fa-check-circle'
-                                    : 'fa-pause-circle'
-                            } me-1`}
+                    <div className="form-check form-switch d-flex align-items-center gap-2 mb-0">
+                        <input
+                            className="form-check-input m-0"
+                            type="checkbox"
+                            role="switch"
+                            checked={plan.status === 1}
+                            disabled={pendingStatusUpdates.has(plan.id)}
+                            aria-label={`Set ${plan.name} ${plan.status === 1 ? 'inactive' : 'active'}`}
+                            onChange={() => togglePlanStatus(plan)}
                         />
-                        {plan.status === 1 ? 'Active' : 'Inactive'}
-                    </span>
+                        <span className={plan.status === 1 ? 'text-success' : 'text-body-secondary'}>
+                            {plan.status === 1 ? 'On' : 'Off'}
+                        </span>
+                    </div>
                 ),
             },
             {
@@ -207,7 +228,7 @@ export default function Index({ plans, sorting }: PlanIndexProps) {
                 ),
             },
         ],
-        [url],
+        [url, pendingStatusUpdates],
     );
 
     return (
