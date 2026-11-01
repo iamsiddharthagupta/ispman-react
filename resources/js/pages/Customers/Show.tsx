@@ -518,12 +518,12 @@ export default function Show({ customer, plans }: ShowProps) {
                                         </div>
                                     </div>
                                     <div className="modal-footer">
-                                        <button type="button" className="btn btn-secondary" onClick={() => setShowRenewalModal(false)}>
-                                            Cancel
-                                        </button>
                                         <button type="submit" className="btn btn-primary" disabled={renewal.processing || plans.length === 0}>
                                             {renewal.processing && <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />}
                                             {renewal.processing ? 'Renewing…' : 'Confirm renewal'}
+                                        </button>
+                                        <button type="button" className="btn btn-secondary" onClick={() => setShowRenewalModal(false)}>
+                                            Cancel
                                         </button>
                                     </div>
                                 </form>
@@ -686,10 +686,7 @@ export default function Show({ customer, plans }: ShowProps) {
                                     </div>
 
                                     <div className="modal-footer bg-light-subtle border-top">
-                                        <button type="button" className="btn btn-secondary px-3" onClick={closePaymentModal}>
-                                        Cancel
-                                        </button>
-                                        <button type="submit" className="btn btn-success px-4" disabled={payment.processing}>
+                                        <button type="submit" className="btn btn-success px-3" disabled={payment.processing}>
                                         {payment.processing ? (
                                             <>
                                             <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
@@ -698,6 +695,9 @@ export default function Show({ customer, plans }: ShowProps) {
                                         ) : (
                                             'Save payment'
                                         )}
+                                        </button>
+                                        <button type="button" className="btn btn-secondary px-3" onClick={closePaymentModal}>
+                                        Cancel
                                         </button>
                                     </div>
                                 </form>

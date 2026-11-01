@@ -282,61 +282,6 @@ export default function Navbar() {
                     </div>
                 </li>
 
-                {/* Language Menu */}
-                <li className="nav-item dropdown">
-                    <a
-                    className="nav-link"
-                    href="#"
-                    id="language-menu"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                    aria-label="Change language, current language English"
-                    >
-                    <i className="bi bi-translate" aria-hidden="true"></i>
-                    </a>
-
-                    <ul
-                    className="dropdown-menu dropdown-menu-end"
-                    aria-labelledby="language-menu"
-                    >
-                    <li>
-                        <a
-                        className="dropdown-item active"
-                        href="#"
-                        hrefLang="en"
-                        aria-current="true"
-                        >
-                        English
-                        <i className="bi bi-check-lg ms-2" aria-hidden="true"></i>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a className="dropdown-item" href="#" hrefLang="es">
-                        Español
-                        </a>
-                    </li>
-
-                    <li>
-                        <a className="dropdown-item" href="#" hrefLang="fr">
-                        Français
-                        </a>
-                    </li>
-
-                    <li>
-                        <a className="dropdown-item" href="#" hrefLang="de">
-                        Deutsch
-                        </a>
-                    </li>
-
-                    <li>
-                        <a className="dropdown-item" href="#" hrefLang="ar">
-                        العربية
-                        </a>
-                    </li>
-                    </ul>
-                </li>
-
                 {/* Fullscreen Toggle */}
                 <li className="nav-item">
                     <a
