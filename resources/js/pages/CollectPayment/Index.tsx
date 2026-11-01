@@ -132,6 +132,29 @@ export default function Index({ orders, search }: CollectPaymentProps) {
         });
     }
 
+    const tableStyles = {
+        headCells: {
+            style: {
+                fontSize: '13px',
+                fontWeight: '700',
+                paddingLeft: '16px',
+                paddingRight: '16px',
+            },
+        },
+        cells: {
+            style: {
+                fontSize: '15px',
+                paddingLeft: '16px',
+                paddingRight: '16px',
+            },
+        },
+        rows: {
+            style: {
+                minHeight: '54px',
+            },
+        },
+    };
+
     const columns = useMemo<TableColumn<CollectionOrder>[]>(
         () => [
             {
@@ -309,6 +332,7 @@ export default function Index({ orders, search }: CollectPaymentProps) {
                         <div className="card border-0 shadow-sm">
                             <div className="card-body p-0">
                                 <DataTable
+                                    customStyles={tableStyles}
                                     key={orders.current_page}
                                     columns={columns}
                                     data={orders.data}
