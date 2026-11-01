@@ -346,9 +346,19 @@ export default function Show({ customer, plans }: ShowProps) {
                                             <div className="min-w-0"><div className="customer-profile-label">PHONE</div><div className="customer-profile-value text-break">{customer.phone || '—'}</div></div>
                                         </div>
                                         <div className="customer-profile-info-item customer-profile-info-wide">
-                                            <span className="customer-profile-info-icon"><i className="fas fa-wifi" /></span>
-                                            <div className="min-w-0"><div className="customer-profile-label">CURRENT PLAN</div><div className="customer-profile-value">{customer.plan?.name ?? 'No plan assigned'}</div></div>
-                                        </div>
+                                            <span className="customer-profile-info-icon">
+                                                <i className="fas fa-wifi" />
+                                            </span>
+                                            <div className="min-w-0">
+                                                <div className="customer-profile-label">CURRENT PLAN</div>
+                                                <div 
+                                                className={`customer-profile-value ${customer.plan?.status === 0 ? 'text-danger' : ''}`}
+                                                >
+                                                {customer.plan?.name ?? 'No plan assigned'}
+                                                </div>
+                                            </div>
+                                            </div>
+
                                         <div className="customer-profile-info-item customer-profile-info-wide">
                                             <span className="customer-profile-info-icon"><i className="fas fa-location-dot" /></span>
                                             <div className="min-w-0"><div className="customer-profile-label">ADDRESS</div><div className="customer-profile-value text-break">{[customer.address_line_1, customer.address_line_2, customer.address_area].filter(Boolean).join(', ') || '—'}</div></div>

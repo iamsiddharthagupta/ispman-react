@@ -72,7 +72,7 @@ export default function Sidebar() {
                         <li className="nav-header">Customer Management</li>
                         <li className="nav-item">
                             <Link href={customersUrl} className={`nav-link${url.split('?')[0].includes('/customers') ? ' active' : ''}`}>
-                                <i className="nav-icon fa-regular fa-user" />
+                                <i className="nav-icon fa-solid fa-user" />
                                 <p>Customers</p>
                             </Link>
                         </li>
@@ -81,7 +81,7 @@ export default function Sidebar() {
                         <li className="nav-item">
                             <Link href={plansUrl} className={`nav-link${url.split('?')[0].includes('/plans') ? ' active' : ''}`}>
                                 <i className="nav-icon fa-solid fa-wifi" />
-                                <p>Plans</p>
+                                <p>Internet Plans</p>
                             </Link>
                         </li>
 

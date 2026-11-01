@@ -5,6 +5,7 @@ export interface CustomerPlan {
     price?: string;
     vendor_name?: string;
     duration?: number;
+    status?: number;
 }
 
 export interface CustomerPayment {

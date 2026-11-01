@@ -113,7 +113,7 @@ class CustomerController extends Controller
     public function create(): Response
     {
         return Inertia::render('Customers/Create', [
-            'plans' => Plan::query()->orderBy('name')->get(['id', 'name', 'vendor_name']),
+            'plans' => Plan::query()->orderBy('name')->where('status', 1)->get(['id', 'name', 'vendor_name']),
         ]);
     }
 
@@ -134,7 +134,7 @@ class CustomerController extends Controller
     {
         return Inertia::render('Customers/Show', [
             'customer' => $customer->load([
-                'plan:id,name',
+                'plan:id,name,status',
                 'orders' => fn ($query) => $query->with('payments')->latest(),
             ]),
             'plans' => Plan::query()

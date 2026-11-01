@@ -400,7 +400,7 @@ export default function Navbar() {
                     <li className="user-header text-bg-primary">
                         <div
                         className="rounded-circle shadow bg-white text-primary d-flex align-items-center justify-content-center fw-bold mx-auto"
-                        style={{ width: 90, height: 90, border: '3px solid var(--bs-border-color-translucent)' }}
+                        style={{ width: 90, height: 90, border: '3px solid var(--bs-border-color-translucent)', fontSize: '2rem' }}
                         aria-hidden="true"
                         >
                         {initials}
@@ -411,23 +411,6 @@ export default function Navbar() {
                         {user?.email && <small>{user.email}</small>}
                         </p>
                     </li>
-
-                    {/* User Body */}
-                    {/* <li className="user-body">
-                        <div className="row">
-                        <div className="col-4 text-center">
-                            <a href="#">Followers</a>
-                        </div>
-
-                        <div className="col-4 text-center">
-                            <a href="#">Sales</a>
-                        </div>
-
-                        <div className="col-4 text-center">
-                            <a href="#">Friends</a>
-                        </div>
-                        </div>
-                    </li> */}
 
                     {/* User Footer */}
                     <li className="user-footer">
