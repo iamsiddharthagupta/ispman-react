@@ -87,6 +87,157 @@ function getPaidAmount(order: CustomerOrder): number {
     return order.payments.reduce((total, payment) => total + Number(payment.paid_amount), 0);
 }
 
+function escapeHtml(value: string): string {
+    return value.replace(/[&<>"']/g, (character) => {
+        const entities: Record<string, string> = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+        };
+
+        return entities[character];
+    });
+}
+
+function openBill(customer: Customer, order: CustomerOrder): void {
+    const billWindow = window.open('', '_blank');
+
+    if (!billWindow) {
+        window.alert('Please allow pop-ups to generate the bill.');
+
+        return;
+    }
+
+    billWindow.opener = null;
+
+    const customerAddress = [
+        customer.address_line_1,
+        customer.address_line_2,
+        customer.address_area,
+    ]
+        .filter(Boolean)
+        .join(', ');
+    const adjustment = Number(order.balance_adjustment);
+    const netAmount = Number(order.plan_price) + adjustment;
+    const payments = [...order.payments].sort(
+        (first, second) =>
+            first.payment_date.localeCompare(second.payment_date) || first.id - second.id,
+    );
+    const paymentRows = payments.length
+        ? payments
+              .map(
+                  (payment) => `
+                    <tr>
+                        <td>${escapeHtml(formatDate(payment.payment_date))}</td>
+                        <td>${escapeHtml(payment.mode)}</td>
+                        <td class="amount">${escapeHtml(formatMoney(payment.paid_amount))}</td>
+                    </tr>`,
+              )
+              .join('')
+        : '<tr><td colspan="3" class="empty">No payments recorded for this bill.</td></tr>';
+
+    billWindow.document.open();
+    billWindow.document.write(`<!doctype html>
+        <html lang="en">
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Internet bill ${escapeHtml(order.order_number)}</title>
+                <style>
+                    @page { size: A4; margin: 18mm; }
+                    * { box-sizing: border-box; }
+                    body { color: #172033; font: 14px/1.5 Arial, sans-serif; margin: 0; }
+                    .bill { margin: 0 auto; max-width: 800px; }
+                    .header { align-items: flex-start; border-bottom: 3px solid #1769aa; display: flex; justify-content: space-between; padding-bottom: 18px; }
+                    .brand { color: #1769aa; font-size: 24px; font-weight: 700; }
+                    .subtitle { color: #687386; font-size: 12px; margin-top: 3px; }
+                    .bill-title { font-size: 20px; font-weight: 700; margin: 0; text-align: right; }
+                    .meta { color: #475569; font-size: 12px; margin-top: 7px; text-align: right; }
+                    .section { margin-top: 24px; }
+                    .section-title { color: #1769aa; font-size: 12px; font-weight: 700; letter-spacing: .06em; margin: 0 0 9px; text-transform: uppercase; }
+                    .customer { background: #f3f7fb; border-radius: 6px; padding: 14px 16px; }
+                    .customer-name { font-size: 16px; font-weight: 700; }
+                    .muted { color: #64748b; }
+                    .connection { border-collapse: collapse; width: 100%; }
+                    .connection td { border-bottom: 1px solid #e2e8f0; padding: 9px 4px; vertical-align: top; }
+                    .connection td:first-child { color: #64748b; width: 35%; }
+                    table.items { border-collapse: collapse; margin-top: 8px; width: 100%; }
+                    .items th { background: #f3f7fb; color: #475569; font-size: 11px; letter-spacing: .04em; padding: 10px 8px; text-align: left; text-transform: uppercase; }
+                    .items td { border-bottom: 1px solid #e2e8f0; padding: 10px 8px; }
+                    .items .amount { text-align: right; white-space: nowrap; }
+                    .summary { margin: 12px 0 0 auto; max-width: 340px; width: 100%; }
+                    .summary-row { display: flex; justify-content: space-between; padding: 5px 0; }
+                    .summary-total { border-top: 2px solid #1769aa; font-size: 16px; font-weight: 700; margin-top: 5px; padding-top: 10px; }
+                    .status { background: #e8f5ed; border-radius: 4px; color: #176b3a; display: inline-block; font-size: 12px; font-weight: 700; margin-top: 8px; padding: 4px 9px; }
+                    .footer { border-top: 1px solid #e2e8f0; color: #64748b; font-size: 11px; margin-top: 34px; padding-top: 12px; text-align: center; }
+                    .empty { color: #64748b; text-align: center; }
+                    @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+                </style>
+            </head>
+            <body>
+                <main class="bill">
+                    <header class="header">
+                        <div>
+                            <div class="brand">INTERNET SERVICE</div>
+                            <div class="subtitle">Connection bill and payment statement</div>
+                        </div>
+                        <div>
+                            <h1 class="bill-title">INTERNET BILL</h1>
+                            <div class="meta">Bill no: ${escapeHtml(order.order_number)}<br>Bill date: ${escapeHtml(formatDate(today()))}</div>
+                            <div class="status">PAID</div>
+                        </div>
+                    </header>
+                    <section class="section">
+                        <h2 class="section-title">Customer</h2>
+                        <div class="customer">
+                            <div class="customer-name">${escapeHtml(customer.name)}</div>
+                            <div class="muted">Customer ID: ${escapeHtml(customer.username)}</div>
+                            ${customerAddress ? `<div>${escapeHtml(customerAddress)}</div>` : ''}
+                            ${customer.phone ? `<div>Phone: ${escapeHtml(customer.phone)}</div>` : ''}
+                        </div>
+                    </section>
+                    <section class="section">
+                        <h2 class="section-title">Internet connection</h2>
+                        <table class="connection">
+                            <tr><td>Plan</td><td><strong>${escapeHtml(order.plan_name)}</strong></td></tr>
+                            <tr><td>Speed</td><td>${escapeHtml(order.plan_speed)}</td></tr>
+                            <tr><td>Service period</td><td>${escapeHtml(formatDate(order.start_date))} to ${escapeHtml(formatDate(order.end_date))}</td></tr>
+                            <tr><td>Plan term</td><td>${escapeHtml(order.plan_duration)} month(s)</td></tr>
+                        </table>
+                    </section>
+                    <section class="section">
+                        <h2 class="section-title">Bill summary</h2>
+                        <table class="items">
+                            <thead><tr><th>Description</th><th class="amount">Amount</th></tr></thead>
+                            <tbody>
+                                <tr><td>Internet plan - ${escapeHtml(order.plan_name)}</td><td class="amount">${escapeHtml(formatMoney(order.plan_price))}</td></tr>
+                                ${adjustment !== 0 ? `<tr><td>${adjustment > 0 ? 'Previous balance' : 'Previous credit'}</td><td class="amount">${escapeHtml(formatMoney(Math.abs(adjustment)))}</td></tr>` : ''}
+                            </tbody>
+                        </table>
+                        <div class="summary">
+                            <div class="summary-row"><span>Bill total</span><strong>${escapeHtml(formatBalance(netAmount))}</strong></div>
+                            <div class="summary-row"><span>Payments received</span><strong>${escapeHtml(formatMoney(getPaidAmount(order)))}</strong></div>
+                            <div class="summary-row summary-total"><span>Balance</span><span>${escapeHtml(formatBalance(Number(order.due_amount)))}</span></div>
+                        </div>
+                    </section>
+                    <section class="section">
+                        <h2 class="section-title">Payment details</h2>
+                        <table class="items">
+                            <thead><tr><th>Date</th><th>Mode</th><th class="amount">Amount received</th></tr></thead>
+                            <tbody>${paymentRows}</tbody>
+                        </table>
+                    </section>
+                    <footer class="footer">This bill is for the internet connection and service period shown above. Generated on ${escapeHtml(formatDate(today()))}.</footer>
+                </main>
+            </body>
+        </html>`);
+    billWindow.document.close();
+    billWindow.focus();
+    billWindow.setTimeout(() => billWindow.print(), 250);
+}
+
 function formatBalance(value: number): string {
     return value < 0 ? `Credit ${formatMoney(Math.abs(value))}` : formatMoney(value);
 }
@@ -234,8 +385,8 @@ export default function Show({ customer, plans }: ShowProps) {
             selector: (order) => Number(order.plan_price),
             sortable: true,
             right: true,
-            minWidth: '90px',
-            grow: 0.9,
+            minWidth: '50px',
+            grow: 0.8,
             cell: (order) => (
                 <div className="text-end">
                     <div>{formatMoney(order.plan_price)}</div>
@@ -254,8 +405,8 @@ export default function Show({ customer, plans }: ShowProps) {
             selector: (order) => getPaidAmount(order),
             sortable: true,
             right: true,
-            minWidth: '92px',
-            grow: 0.9,
+            minWidth: '50px',
+            grow: 0.8,
             cell: (order) => formatMoney(getPaidAmount(order)),
         },
         {
@@ -264,8 +415,8 @@ export default function Show({ customer, plans }: ShowProps) {
             selector: (order) => Number(order.due_amount),
             sortable: true,
             right: true,
-            minWidth: '50px',
-            grow: 0.9,
+            minWidth: '30px',
+            grow: 0.8,
             cell: (order) => (
                 <span className={Number(order.due_amount) <= 0 ? 'text-success fw-semibold' : 'fw-semibold'}>
                     {formatBalance(Number(order.due_amount))}
@@ -278,9 +429,9 @@ export default function Show({ customer, plans }: ShowProps) {
             button: true,
             right: true,
             ignoreRowClick: true,
-            minWidth: '50px',
-            style: { paddingRight: '12px' },
-            grow: 0.75,
+            minWidth: '80px',
+            style: { paddingRight: '0.5rem' },
+            grow: 0.8,
             cell: (order) =>
                 Number(order.due_amount) > 0 ? (
                     <button
@@ -293,7 +444,16 @@ export default function Show({ customer, plans }: ShowProps) {
                         <i className="fas fa-plus" />
                     </button>
                 ) : (
-                    <span className="badge text-bg-success">Paid</span>
+                    <button
+                        type="button"
+                        className="btn btn-sm btn-outline-primary text-nowrap"
+                        aria-label={`Generate bill for ${order.order_number}`}
+                        title="Generate bill and save as PDF"
+                        onClick={() => openBill(customer, order)}
+                    >
+                        <i className="fas fa-file-pdf me-1" />
+                        Bill
+                    </button>
                 ),
         },
     ];
