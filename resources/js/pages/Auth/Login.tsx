@@ -26,57 +26,86 @@ export default function Login({ status, canResetPassword = false }: LoginProps) 
     return (
         <AuthLayout action={<Link href="/register">Create account</Link>}>
             <Head title="Sign in" />
-            <div className="login-box">
-                <div className="card">
-                    <div className="card-body login-card-body">
-                        <p className="login-box-msg">Sign in to manage your network</p>
-
-                        {status && (
-                            <div className="alert alert-success" role="status">
-                                {status}
+            <div className="auth-page">
+                <div className="auth-box">
+                    <div className="card auth-card">
+                        <div className="card-body auth-card-body">
+                            <div className="auth-brand">
+                                <span className="auth-brand-mark" aria-hidden="true">
+                                    <i className="bi bi-router-fill" />
+                                </span>
+                                <span>ISPMan</span>
                             </div>
-                        )}
+                            <div className="auth-heading">
+                                <h1>Welcome back</h1>
+                                <p>Sign in to manage your network.</p>
+                            </div>
 
-                        <form onSubmit={submit}>
-                            <div className="input-group mb-3">
-                                <input
-                                    id="email"
-                                    type="email"
-                                    className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                                    placeholder="Email"
-                                    value={data.email}
-                                    onChange={(event) => setData('email', event.target.value)}
-                                    autoComplete="username"
-                                    autoFocus
-                                    required
-                                    aria-invalid={Boolean(errors.email)}
-                                />
-                                <div className="input-group-text">
-                                    <span className="bi bi-envelope" />
+                            {status && (
+                                <div className="alert alert-success auth-status" role="status">
+                                    {status}
                                 </div>
-                                {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-                            </div>
+                            )}
 
-                            <div className="input-group mb-3">
-                                <input
-                                    id="password"
-                                    type="password"
-                                    className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                                    placeholder="Password"
-                                    value={data.password}
-                                    onChange={(event) => setData('password', event.target.value)}
-                                    autoComplete="current-password"
-                                    required
-                                    aria-invalid={Boolean(errors.password)}
-                                />
-                                <div className="input-group-text">
-                                    <span className="bi bi-lock" />
+                            <form onSubmit={submit} className="auth-form">
+                                <div className="mb-3">
+                                    <label className="auth-field-label" htmlFor="email">
+                                        Email address
+                                    </label>
+                                    <div className="input-group auth-input-group">
+                                        <span className="input-group-text" aria-hidden="true">
+                                            <i className="bi bi-envelope" />
+                                        </span>
+                                        <input
+                                            id="email"
+                                            type="email"
+                                            className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                                            placeholder="you@example.com"
+                                            value={data.email}
+                                            onChange={(event) => setData('email', event.target.value)}
+                                            autoComplete="username"
+                                            autoFocus
+                                            required
+                                            aria-invalid={Boolean(errors.email)}
+                                            aria-describedby={errors.email ? 'email-error' : undefined}
+                                        />
+                                    </div>
+                                    {errors.email && (
+                                        <div id="email-error" className="auth-field-error" role="alert">
+                                            {errors.email}
+                                        </div>
+                                    )}
                                 </div>
-                                {errors.password && <div className="invalid-feedback">{errors.password}</div>}
-                            </div>
 
-                            <div className="row">
-                                <div className="col-8">
+                                <div className="mb-3">
+                                    <label className="auth-field-label" htmlFor="password">
+                                        Password
+                                    </label>
+                                    <div className="input-group auth-input-group">
+                                        <span className="input-group-text" aria-hidden="true">
+                                            <i className="bi bi-lock" />
+                                        </span>
+                                        <input
+                                            id="password"
+                                            type="password"
+                                            className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                                            placeholder="Enter your password"
+                                            value={data.password}
+                                            onChange={(event) => setData('password', event.target.value)}
+                                            autoComplete="current-password"
+                                            required
+                                            aria-invalid={Boolean(errors.password)}
+                                            aria-describedby={errors.password ? 'password-error' : undefined}
+                                        />
+                                    </div>
+                                    {errors.password && (
+                                        <div id="password-error" className="auth-field-error" role="alert">
+                                            {errors.password}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="auth-options">
                                     <div className="form-check">
                                         <input
                                             id="remember"
@@ -89,23 +118,20 @@ export default function Login({ status, canResetPassword = false }: LoginProps) 
                                             Remember me
                                         </label>
                                     </div>
+                                    {canResetPassword && <Link href="/forgot-password">Forgot password?</Link>}
                                 </div>
-                                <div className="col-4">
-                                    <button type="submit" className="btn btn-primary w-100" disabled={processing}>
-                                        {processing ? 'Wait...' : 'Sign in'}
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
 
-                        {canResetPassword && (
-                            <p className="mb-1 mt-3">
-                                <Link href="/forgot-password">I forgot my password</Link>
-                            </p>
-                        )}
-                        <p className="mb-0 mt-2">
-                            <Link href="/register">Create an account</Link>
-                        </p>
+                                <button type="submit" className="btn btn-primary w-100 auth-submit" disabled={processing}>
+                                    {processing && <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />}
+                                    {processing ? 'Signing in...' : 'Sign in'}
+                                    {!processing && <i className="bi bi-arrow-right ms-2" aria-hidden="true" />}
+                                </button>
+                            </form>
+
+                            <div className="auth-footer">
+                                <span>New to ISPMan?</span> <Link href="/register">Create an account</Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

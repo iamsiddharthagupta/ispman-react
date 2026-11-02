@@ -49,7 +49,7 @@ export default function Password() {
                                         </div>
                                     )}
 
-                                    <form onSubmit={submit}>
+                                    <form id="password-update-form" onSubmit={submit}>
                                         <div className="mb-3">
                                             <label htmlFor="current_password" className="form-label">
                                                 Current password
@@ -101,7 +101,7 @@ export default function Password() {
                                     </form>
                                 </div>
                                 <div className="card-footer">
-                                    <button type="submit" className="btn btn-primary float-end" disabled={processing}>
+                                    <button type="submit" form="password-update-form" className="btn btn-primary float-end" disabled={processing}>
                                         {processing ? 'Updating password...' : 'Update password'}
                                     </button>
                                 </div>
